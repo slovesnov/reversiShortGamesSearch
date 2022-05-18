@@ -14,7 +14,7 @@
 std::vector<int> Reversi::cells,Reversi::possibleMoves;
 std::set<ReversiCode> Reversi::layerSet[maxLayer+1];
 std::set<ReversiCode> Reversi::found[3];
-std::set<ReversiCode> Reversi::foundEndCount[3];
+std::set<ReversiCode> Reversi::foundEndCount[maxLayer+1][3];
 int Reversi::foundMinTurns[3];
 int Reversi::borderCount;
 
@@ -230,32 +230,36 @@ bool Reversi::possibleMove(int index, char move) const {
  * empty 0..linesize,[2...boardsize]*linesize,boardsize*linesize+1 to the end
  */
 int Reversi::index(const std::string &s) {
-	assert(s.length() == 2);
+	assert(s.length() == 2 || (boardSize>=10 && s.length() == 3));
 	char a = tolower(s[0]);
 	assert(a >= 'a' && a < 'a'+boardSize);
-	char d = s[1];
-	assert(d >= '1' && d < '1'+boardSize);
-	a -= 'a';
-	d -= '1';
-	return (a+1) + (d+1) * lineSize;
+	std::string q=s.substr(1);
+	int d=0;
+#ifndef NDEBUG
+		bool b =
+#endif
+	parseString(q,d);//can be "j10"
+	assert(b);
+	assert(d >= 1 && d < 1+boardSize);
+	return (a-'a'+1) + d * lineSize;
 }
 
 std::string Reversi::indexToString(int index) {
-	std::string s(1, char((index % lineSize) + 'a' - 1));
-	return s + char(index / lineSize + '1' - 1);
+	return std::string(1, char((index % lineSize) + 'a' - 1))+std::to_string(index / lineSize);
 }
 
 void Reversi::makeMoves(const std::string &_s) {
 	std::string s=replaceAll(_s, " ", "");
-	assert(s.length() % 2 == 0);
 	size_t i;
-	for (i = 0; i < s.length(); i += 2) {
+	for (i = 0; i < s.length(); ) {
+		int j=2+isdigit(s[i+2]);
 #ifndef NDEBUG
 		bool b =
 #endif
-				makeMove(index(s.substr(i, 2)));
-		//printl(i/2,b,s.substr(i, 2));
+				makeMove(index(s.substr(i, j)));
+		//printl(s.substr(i, j));
 		assert(b);
+		i+=j;
 	}
 }
 
@@ -283,7 +287,7 @@ void Reversi::operator =(const Reversi &re) {
 }
 
 void Reversi::addAllMoves(int layer,ReversiCode const& parentCode)  {
-	int k, l;
+	int j,k, l;
 	bool f = false;
 	Reversi t;
 	ReversiCode tcode;
@@ -301,26 +305,25 @@ void Reversi::addAllMoves(int layer,ReversiCode const& parentCode)  {
 //					exit(0);
 //				}
 
-				if(t.countBorderChips()>0){
+				j=t.countBorderChips();//is used below
+				if(j>0){
 					borderCount++;
 				}
 
 				if (t.isEnd()) {
 					k = t.endGameType();
-					foundEndCount[k].insert(tcode);
+					foundEndCount[layer][k].insert(tcode);
 					//output/count all positions with black and white colors
 					if (found[k].empty()
-							|| (k == BLACK_AND_WHITE /*&& foundMinTurns[k] == layer*/
+							|| (k == BLACK_AND_WHITE && foundMinTurns[k] == layer
 									&& found[k].find(tcode) == found[k].end())) {
 						found[k].insert(tcode);
 						foundMinTurns[k]=layer;
-//						if(t.countBorderChips()<3 && k==BLACK_AND_WHITE){
-//							t.print();
-//						}
-//						t.print();
+						if(printFounded){
+							t.print();
+						}
 #ifdef STORE_MOVE
 						s="";
-						int j;
 						tcode=parentCode;
 						//auto a = this->code();
 						for (j = layer - 1; j > 0; j--) {
@@ -342,8 +345,14 @@ void Reversi::addAllMoves(int layer,ReversiCode const& parentCode)  {
 						println("found %s %d turns %s", gameTypeString[k], layer,s.c_str());
 						fflush(stdout);
 					}
-				} else {
+				} else if(layer!=maxLayer){
+#ifdef BOARD_LAYER
+					if(layer!=BOARD_LAYER || j>0){
+						insert(layer, parentCode, i, tcode);
+					}
+#else
 					insert(layer, parentCode, i, tcode);
+#endif
 				}
 				t.assign(*this, l == 0 ? moveColor : oppositeColor(moveColor));
 			}
@@ -396,20 +405,6 @@ bool Reversi::allFound(std::string& s) {
 		s+=" "+std::to_string(a.size());
 	}
 	return true;
-}
-
-std::string Reversi::forHtml() {
-#ifdef STORE_MOVE
-	int a[] = { BLACK_ONLY, WHITE_ONLY, BLACK_AND_WHITE };
-	std::string s, q;
-	for (int i : a) {
-		q = foundString[i][0];
-		s += "<td>" + q + " " + std::to_string(q.size() / 2);
-	}
-	return s;
-#else
-	return "";
-#endif
 }
 
 void Reversi::fillChars() {
@@ -592,19 +587,50 @@ void Reversi::initFirst2Layers(int type,bool bwOnly/*=false*/) {
 	}
 }
 
-std::string Reversi::endGameCounts() {
+std::string Reversi::endGameCounts(int layer) {
 	std::string s;
-	int i;
-	size_t j,k=0;
-	for(i=0;i<3;i++){
-		j=foundEndCount[i].size();
-		k+=j;
-		if(i){
-			s+='+';
+	int i, noBorderCount;
+	size_t j, k = 0;
+	for (i = 0; i < 3; i++) {
+		auto &set = foundEndCount[layer][i];
+		j = set.size();
+		k += j;
+		if (i) {
+			s += '+';
 		}
-		s+=toString(j,',');
+		s += toString(j, ',');
+		if (j) {
+			noBorderCount= 0;
+			for (auto &a : set) {
+				Reversi r;
+				r.fromCode(a);
+				if( r.countBorderChips()==0){
+					noBorderCount++;
+				}
+			}
+			s+="{nb"+  toString(noBorderCount)+"}";
+		}
 	}
-	s+='='+toString(k, ',');
+	s += '=' + toString(k, ',');
+	return s;
+}
+
+std::string Reversi::shortestEndGameCounts(){
+	std::string s;
+	int i, layer;
+	size_t j;
+	for (i = 0; i < 3; i++) {
+		for (layer = 2; layer <= maxLayer; layer++) {
+			j = foundEndCount[layer][i].size();
+			if (j) {
+				s += toString(j, ',') + ",";
+				break;
+			}
+		}
+		if(layer==maxLayer+1){
+			s+="?,";
+		}
+	}
 	return s;
 }
 
@@ -617,7 +643,6 @@ void Reversi::test(){
 	init(1);
 	makeMoves("D3E3F4G3F3C5H3F2C4C3E2E1B3H4H5A3");
 	print();
-
 
 }
 

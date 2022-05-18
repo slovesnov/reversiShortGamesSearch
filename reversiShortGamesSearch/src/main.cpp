@@ -1,15 +1,14 @@
 #include "aslov.h"
 #include "Reversi.h"
 
-#include <set>
-
 //https://thesaurus.altervista.org/reversi?tz=airyqU6pTShgK78C&fl=if#e3
 // D3E3F4G3F3C5H3F2C4C3E2E1B3H4H5A3 16turns
 
 int main(){
 	const bool standard = 0;
-	const bool bwOnly=1;
-	const bool showProceed1million=1;
+	const bool bwOnly=0;
+	const int proceedN=10'000'000;
+	const bool showProceedN=1;
 	int type = standard ? 1 : 3; //type=1 standard, type=3 non standard
 	Reversi r;
 	std::string s,q;
@@ -18,18 +17,21 @@ int main(){
 	clock_t begin;
 	aslovSetOutputWidth(60);
 
-//	r.test();
-//	return 0;
 
 	Reversi::staticInit();
 	Reversi::initFirst2Layers(type,bwOnly);
 	preventThreadSleep();
 
+//	r.init(1);
+//	r.makeMoves("g6g7g8h8i8i9i10j10e4");
+//	r.print();
+//	return 0;
+
 	s=type<2?"standard":"non standard";
 	s+=format(" board %dx%d",boardSize,boardSize);
-//#ifdef NDEBUG
-//	s+=" NDEBUG";
-//#endif
+#ifndef NDEBUG
+	s+=" DEBUG";
+#endif
 #ifdef USE_SYMMETRY
 	s+=" symmetry="+forma(USE_SYMMETRY);
 #endif
@@ -41,6 +43,12 @@ int main(){
 #else
 	s+="0";
 #endif
+
+#ifdef BOARD_LAYER
+	s+=" boardLayer="+std::to_string(BOARD_LAYER);
+#endif
+
+	s+=" maxLayer="+std::to_string(maxLayer);
 	//printan(s)
 	printl(s)
 
@@ -53,19 +61,20 @@ int main(){
 		for (auto &code : previousSet) {
 			r.fromCode(code);
 			r.addAllMoves(i,code);
-			if(showProceed1million && ++j%1'000'000==0){
-				printf("%d.",(j/1'000'000)%10);
+			if(showProceedN && ++j%proceedN==0){
+				printf("%d.",j/proceedN);
 				fflush(stdout);
 			}
 		}
 
 		ssize=set.size();
-		if(showProceed1million && j>1'000'000){
+		if(showProceedN && j>proceedN){
 			printf("\n");
 		}
 
-		s=format("%2d %11s bf=%.2lf", i,toString(ssize,',').c_str(),double(ssize)/psize );
-		q=Reversi::endGameCounts();
+		s=format("%2d %11s bf=", i,i==maxLayer ? "?": toString(ssize,',').c_str() );
+		s+=i==maxLayer ? "?.??" : format("%.2lf",double(ssize)/psize);
+		q=Reversi::endGameCounts(i);
 		if(q!="0+0+0=0"){
 			s+=" "+q;
 		}
@@ -79,7 +88,6 @@ int main(){
 		fflush(stdout);
 
 		for(j=0;j<3;j++){
-			Reversi::foundEndCount[j].clear();
 			Reversi::borderCount=0;
 		}
 		#ifndef STORE_MOVE
@@ -87,18 +95,12 @@ int main(){
 		#endif
 
 		if(Reversi::allFound(s)){
-//			break;
+			break;
 		}
 
 	}
+	printi
 
-//	s = "";
-//	for (i = 0; i < 3; i++) {
-//		s += std::to_string(Reversi::foundMinTurns[i]) + " ";
-//	}
-//	printl(s)
+	printl(	Reversi::shortestEndGameCounts())
 
-#ifdef STORE_MOVE
-	printl(Reversi::forHtml())
-#endif
 }

@@ -15,13 +15,18 @@
 #include <vector>
 #include <string>
 
-//allow boardSize>8
-const int boardSize = 8;
+//allow boardSize > 8
+const int boardSize = 10;
+
+const bool printFounded=0;
+
+//cut all positions without board chips on this layer, if not defined never cut
+//#define BOARD_LAYER 10
 
 /* Note. Program do not add endgame positions to layerSet so set not contains all positions
  * all end game positions showed in form 0+66+0=66
  */
-const int maxLayer=14;
+const int maxLayer=11;
 
 /* ifdef USE_SYMMETRY much slower but needs less memory, also "move string" will be invalid
  * 1 or 2 or not defined if symmetry not used
@@ -32,10 +37,10 @@ const int maxLayer=14;
  * USE_SYMMETRY 1 layer 11  36,098,556 bf=6.50 2,199+0+7=2,206 0:51 main.cpp:65 main()
  * USE_SYMMETRY 2 layer 11  36,098,556 bf=6.50 2,199+0+7=2,206 1:06 main.cpp:65 main()
  */
-//#define USE_SYMMETRY 1
+#define USE_SYMMETRY 1
 
 #ifndef USE_SYMMETRY
-//STORE_MOVE is valid only if USE_SYMMETRY isn't defined
+	//STORE_MOVE is valid only if USE_SYMMETRY isn't defined
 	#define STORE_MOVE
 #endif
 
@@ -74,7 +79,7 @@ public:
 	static std::vector<int> cells, possibleMoves;
 	static std::set<ReversiCode> layerSet[maxLayer+1];
 	static std::set<ReversiCode> found[3];
-	static std::set<ReversiCode> foundEndCount[3];
+	static std::set<ReversiCode> foundEndCount[maxLayer+1][3];
 	static int foundMinTurns[3];
 	static int borderCount;
 #ifdef STORE_MOVE
@@ -105,7 +110,6 @@ public:
 	int endGameType()const;
 	static void setSearchOnlyBlackAndWhite();
 	static bool allFound(std::string& s);
-	static std::string forHtml();
 
 	void fillChars();
 	void printChars();
@@ -119,7 +123,8 @@ public:
 			ReversiCode &code);
 
 	static void initFirst2Layers(int type,bool bwOnly=false);
-	static std::string endGameCounts();
+	static std::string endGameCounts(int layer);
+	static std::string shortestEndGameCounts();
 	void test();
 	int countBorderChips()const;
 	void fillForFlip();
