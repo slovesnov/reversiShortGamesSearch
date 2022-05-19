@@ -16,9 +16,7 @@
 #include <string>
 
 //allow boardSize > 8
-const int boardSize = 10;
-
-const bool printFounded=0;
+const int boardSize = 8;
 
 //cut all positions without board chips on this layer, if not defined never cut
 //#define BOARD_LAYER 10
@@ -26,7 +24,7 @@ const bool printFounded=0;
 /* Note. Program do not add endgame positions to layerSet so set not contains all positions
  * all end game positions showed in form 0+66+0=66
  */
-const int maxLayer=11;
+const int maxLayer=12;
 
 /* ifdef USE_SYMMETRY much slower but needs less memory, also "move string" will be invalid
  * 1 or 2 or not defined if symmetry not used
@@ -37,7 +35,7 @@ const int maxLayer=11;
  * USE_SYMMETRY 1 layer 11  36,098,556 bf=6.50 2,199+0+7=2,206 0:51 main.cpp:65 main()
  * USE_SYMMETRY 2 layer 11  36,098,556 bf=6.50 2,199+0+7=2,206 1:06 main.cpp:65 main()
  */
-#define USE_SYMMETRY 1
+//#define USE_SYMMETRY 1
 
 #ifndef USE_SYMMETRY
 	//STORE_MOVE is valid only if USE_SYMMETRY isn't defined

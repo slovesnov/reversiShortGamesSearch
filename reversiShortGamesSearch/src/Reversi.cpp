@@ -58,7 +58,7 @@ bool ReversiCode::operator ==(const ReversiCode &o) const {
 std::string ReversiCode::toString()const{
 	std::string s;
 	for (auto &a : c) {
-		s += format("%llx ", a);
+		s += format("0x%llx ", a);
 	}
 	if(moveColor==Reversi::black){
 		s+="black";
@@ -310,18 +310,61 @@ void Reversi::addAllMoves(int layer,ReversiCode const& parentCode)  {
 					borderCount++;
 				}
 
+				/*
+				//0x148004200400000 0x400010006a00560 black
+				const uint64_t a[]={//0x148004200400000, 0x400010006a00560,
+//				0x156000a002000800, 0x510164,
+//				0x9500a9000400010, 0x10081002140,
+//				0x1940450000000000, 0x2000800a000954,
+				0x2140810001000000, 0x1000400a900950,
+				0x164005100000000, 0x800020000a01560,
+				0x56006a001000400, 0x4000420148,
+				0x9540a0000800020, 0x45001940};
+				for(int ii=0;ii<SIZEI(a);ii+=2){
+				if(tcode.c[0]==a[ii] && tcode.c[1]==a[ii+1] && tcode.moveColor==black){
+					printl(ii,"@@@@@@@@@@@@");
+
+#ifdef STORE_MOVE
+					s="";
+					tcode=parentCode;
+					//auto a = this->code();
+					for (j = layer - 1; j > 0; j--) {
+						auto it = layerSet[j].find(tcode);
+						assert(it != layerSet[j].end());
+						auto p=it->parent;
+						for(auto&a:tcode.c){
+							a=*p++;
+						}
+						tcode.moveColor = it->parentColor;
+						s = indexToString(it->move) + "" + s;
+					}
+					s += indexToString(i);
+					printl(s)
+#endif
+
+				}
+				}
+*/
+
 				if (t.isEnd()) {
 					k = t.endGameType();
 					foundEndCount[layer][k].insert(tcode);
+
+//					static int bc=boardSize2;
+//					if(k==BLACK_AND_WHITE && j<bc){
+//						bc=j;
+//						printl("found border",bc,"lastmove",indexToString(i))
+//						t.print();
+//						printl("parent",parentCode.toString())
+//						print();
+//					}
+
 					//output/count all positions with black and white colors
 					if (found[k].empty()
 							|| (k == BLACK_AND_WHITE && foundMinTurns[k] == layer
 									&& found[k].find(tcode) == found[k].end())) {
 						found[k].insert(tcode);
 						foundMinTurns[k]=layer;
-						if(printFounded){
-							t.print();
-						}
 #ifdef STORE_MOVE
 						s="";
 						tcode=parentCode;
@@ -608,7 +651,7 @@ std::string Reversi::endGameCounts(int layer) {
 					noBorderCount++;
 				}
 			}
-			s+="{nb"+  toString(noBorderCount)+"}";
+			s+="{nb"+  toString(noBorderCount,',')+"}";
 		}
 	}
 	s += '=' + toString(k, ',');
@@ -640,9 +683,34 @@ void Reversi::test(){
 
 	staticInit();
 
-	init(1);
-	makeMoves("D3E3F4G3F3C5H3F2C4C3E2E1B3H4H5A3");
-	print();
+//	init(1);
+//	makeMoves("D3E3F4G3F3C5H3F2C4C3E2E1B3H4H5A3");
+//	print();
+
+	int i,j;
+	ReversiCode c;
+	c.c[0]= 0x148004200400000;
+	c.c[1]=0x400010006a00560;
+	c.moveColor=black;
+	std::set<ReversiCode> set;
+	set.insert(c);
+	printl(c);
+	for (j = 0; j < 2; j++) {
+		r.fromCode(c);
+		if (j) {
+			r = r.flipHorisontal();
+		}
+		for (i = 0; i < 4; i++) {
+			if(j!=0 || i!=0){
+				ReversiCode c1=r.code1();
+				set.insert(c1);
+				printl(r.code1());
+			}
+			r = r.rotate90();
+		}
+	}
+	printl(set.size())
+
 
 }
 

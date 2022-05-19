@@ -5,8 +5,8 @@
 // D3E3F4G3F3C5H3F2C4C3E2E1B3H4H5A3 16turns
 
 int main(){
-	const bool standard = 0;
-	const bool bwOnly=0;
+	const bool standard = 1;
+	const bool bwOnly=1;
 	const int proceedN=10'000'000;
 	const bool showProceedN=1;
 	int type = standard ? 1 : 3; //type=1 standard, type=3 non standard
@@ -15,13 +15,14 @@ int main(){
 	int i,j;
 	size_t psize, ssize;
 	clock_t begin;
+
 	aslovSetOutputWidth(60);
-
-
 	Reversi::staticInit();
 	Reversi::initFirst2Layers(type,bwOnly);
 	preventThreadSleep();
 
+//	r.test();
+//	return 0;
 //	r.init(1);
 //	r.makeMoves("g6g7g8h8i8i9i10j10e4");
 //	r.print();
@@ -95,7 +96,7 @@ int main(){
 		#endif
 
 		if(Reversi::allFound(s)){
-			break;
+//			break;
 		}
 
 	}
