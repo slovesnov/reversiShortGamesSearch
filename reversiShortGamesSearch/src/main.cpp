@@ -105,3 +105,53 @@ int main(){
 	printl(	Reversi::shortestEndGameCounts())
 
 }
+
+/* file parser for html
+ int main() {
+	std::ifstream f("in.txt");
+	std::string s,line,q,a[14][6];
+	int layer,i,j;
+	for(i=0;i<14;i++){
+		for(j=0;j<6;j++){
+			a[i][j]="*";
+		}
+	}
+
+	std::regex re(R"((([\d,]+)(\{nb[\d,]+\})?[+=]){3})");
+	std::cmatch m;
+	std::regex re1(R"(\{nb[\d,]+\})");
+
+	int k=-3;
+	while(std::getline(f, line)){
+		if(line.find("bf=")!=std::string::npos && (layer=stoi(line))>=7){
+			if(layer==7){
+				k+=3;
+			}
+			auto*p=a[layer]+k;
+			if(std::regex_search (line.c_str(), m, re)){
+				q=m[0];
+				q=q.substr(0,q.length()-1);
+				s=std::regex_replace(q, re1, "");
+				auto v=split(s,"+");
+				for(auto&a:v){
+					*p++=a;
+				}
+			}
+			else{
+				p[0]=p[1]=p[2]="0";
+			}
+			printl(line)
+		}
+	}
+
+	for(i=7;i<14;i++){
+		printf("<tr><td>%d",i);
+		for(j=0;j<6;j++){
+			printf("<td>%s",a[i][j].c_str());
+		}
+		printf("\n");
+	}
+
+}
+
+ */
