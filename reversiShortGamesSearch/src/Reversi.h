@@ -15,21 +15,27 @@
 #include <vector>
 #include <string>
 
-//allow even boardSize up to 16 if boardSize more than 16 need to change type of boardSize from unsigned char to short
-const int boardSize = 8;
+/* allow even boardSize up to 16 if boardSize more than 16 need to change
+ * type of boardSize from unsigned char to short because of fillForFlip() function
+ */
+const int boardSize = 12;
 
 //cut all positions without board chips on this layer, if not defined never cut
 //#define BOARD_LAYER 11
 
-const int maxLayer1=9;//11
+const int maxLayer1=8;//11
 const int maxLayer=maxLayer1+4;
 
-/*
-#define BOARD_LAYER 11
+//const int maxLayer1=9;//11
+//const int maxLayer=maxLayer1+3;
 
+/*
+const int boardSize = 12;
+#define BOARD_LAYER 9
 const int maxLayer1=11+3;//11
-const int maxLayer=maxLayer1+2;
+const int maxLayer=maxLayer1+3;
 */
+
 
 
 /* ifdef USE_SYMMETRY much slower but needs less memory, also "move string" will be invalid
@@ -65,6 +71,8 @@ public:
 	char moveColor;
 	bool operator<(ReversiCode const &o) const;
 	bool operator==(ReversiCode const &o) const;
+	bool operator!=(ReversiCode const &o) const;
+	//void operator=(ReversiCode const &o);
 	std::string toString()const;
 };
 
@@ -84,9 +92,9 @@ public:
 	static const int lineSize = boardSize + 1;
 	static const int boardSize2 = (boardSize + 2) * lineSize + 1;
 	static const int upleftCenter = boardSize / 2 * lineSize + boardSize / 2; //analog d3 on 8x8 table
-	static const char empty = 0;
-	static const char black = 1;
-	static const char white = 2;
+	static const char black = 0;
+	static const char white = 1;
+	static const char empty = 2;
 	static const int direction[8];
 	static const int BLACK_ONLY=0;
 	static const int WHITE_ONLY=1;
@@ -126,8 +134,8 @@ public:
 	static char oppositeColor(char c);
 	bool isEnd()const;
 	void operator=(Reversi const &re);
-	void addAllMoves(int layer,ReversiCode const& parentCode);
-	void addAllMoves(ReversiCode const& parentCode,int depth,ThreadData&data);
+	void addAllMoves(int layer,ReversiCode const& parentCode)const;
+	void addAllMoves(ReversiCode const& parentCode,int depth,ThreadData&data)const;
 	int endGameType()const;
 	static void setSearchOnlyBlackAndWhite();
 	static bool allFound(std::string& s);
