@@ -12,11 +12,14 @@
 #include "aslov.h"
 
 std::vector<int> Reversi::cells,Reversi::possibleMoves;
-std::set<ReversiCode> Reversi::layerSet[maxLayer+1];
-std::set<ReversiCode> Reversi::found[3];
-std::set<ReversiCode> Reversi::foundEndCount[maxLayer+1][3];
+ReversiCodeSet Reversi::layerSet[maxLayer+1];
+ReversiCodeSet Reversi::found[3];
+ReversiCodeSet Reversi::foundEndCount[maxLayer+1][3];
 int Reversi::foundMinTurns[3];
+int Reversi::maxMinChips=-1;
+#ifdef BORDER_COUNT
 int Reversi::borderCount;
+#endif
 
 #ifdef STORE_MOVE
 std::vector<std::string> Reversi::foundString[3];
@@ -124,7 +127,7 @@ Reversi::Reversi() {
 }
 
 void Reversi::init(int type/*=0*/) {
-	for (char &a : board) {
+	for (auto &a : board) {
 		a = empty;
 	}
 	int i = upleftCenter;
@@ -146,7 +149,7 @@ void Reversi::init(int type/*=0*/) {
 }
 
 void Reversi::print() const {
-	int i, j;
+	int i, j,l;
 	const int k=boardSize>=10?2:1;
 	char c;
 	std::string s = " ";
@@ -161,7 +164,13 @@ void Reversi::print() const {
 	for (i = 1; i <= boardSize; i++) {
 		printf("%*d",k, i);
 		for (j = 1; j <= boardSize; j++) {
-			printf("%c", outChar[int(board[i * lineSize + j])]);
+			l=board[i * lineSize + j];
+			if(l<3){
+				printf("%c", outChar[l]);
+			}
+			else{
+				printf("%x", l);
+			}
 		}
 		printf("%d\n", i);
 	}
@@ -286,12 +295,59 @@ void Reversi::operator =(const Reversi &re) {
 	assign(re,re.moveColor);
 }
 
-void Reversi::addAllMoves(int layer,ReversiCode const& parentCode)  {
-	int j,k, l;
+void Reversi::addAllMoves(ReversiCode const& parentCode,int depth,ThreadData&data){
+	int k, l;
 	bool f = false;
 	Reversi t;
 	ReversiCode tcode;
 	std::string s;
+	const int layer=maxLayer-maxLayer1-depth;
+	for (l = 0; l < 2; l++) {
+		t.assign(*this, l == 0 ? moveColor : oppositeColor(moveColor));
+		for (int i : possibleMoves) {
+			if (t.makeMove(i)) {
+				f = true;
+				if (t.isEnd()) {
+					tcode=t.code();
+					k = t.endGameType();
+					data.foundEndCount[layer][k].insert(tcode);
+
+					if (boardSize>=12 && k == BLACK_AND_WHITE) {
+						t.print();
+						printl(parentCode);
+						print();
+						s = "lastmove " + indexToString(i);
+						println("found %s %d turns %s %d", gameTypeString[k],
+								t.turns(), s.c_str(), int(k));
+						fflush(stdout);
+					}
+
+					//t.checkMaxMinChips();
+				}
+				else{
+					if(depth>1){
+						t.addAllMoves(tcode,depth-1,data);
+					}
+				}
+				t.assign(*this, l == 0 ? moveColor : oppositeColor(moveColor));
+			}
+		}
+		if (f) {
+			return;
+		}
+	}
+}
+
+void Reversi::addAllMoves(int layer,ReversiCode const& parentCode)  {
+#ifdef BORDER_COUNT
+	int j;
+#endif
+	int k, l;
+	bool f = false;
+	Reversi t;
+	ReversiCode tcode;
+	std::string s;
+
 	for (l = 0; l < 2; l++) {
 		t.assign(*this, l == 0 ? moveColor : oppositeColor(moveColor));
 		for (int i : possibleMoves) {
@@ -305,10 +361,12 @@ void Reversi::addAllMoves(int layer,ReversiCode const& parentCode)  {
 //					exit(0);
 //				}
 
-				j=t.countBorderChips();//is used below
+#ifdef BORDER_COUNT
+				j=t.countBorderChips();
 				if(j>0){
 					borderCount++;
 				}
+#endif
 
 				/*
 				//0x148004200400000 0x400010006a00560 black
@@ -350,6 +408,8 @@ void Reversi::addAllMoves(int layer,ReversiCode const& parentCode)  {
 					k = t.endGameType();
 					foundEndCount[layer][k].insert(tcode);
 
+					t.checkMaxMinChips();
+
 //					static int bc=boardSize2;
 //					if(k==BLACK_AND_WHITE && j<bc){
 //						bc=j;
@@ -369,7 +429,7 @@ void Reversi::addAllMoves(int layer,ReversiCode const& parentCode)  {
 						s="";
 						tcode=parentCode;
 						//auto a = this->code();
-						for (j = layer - 1; j > 0; j--) {
+						for (int j = layer - 1; j > 0; j--) {
 							auto it = layerSet[j].find(tcode);
 							assert(it != layerSet[j].end());
 							auto p=it->parent;
@@ -386,11 +446,14 @@ void Reversi::addAllMoves(int layer,ReversiCode const& parentCode)  {
 						s="lastmove "+indexToString(i);
 #endif
 						println("found %s %d turns %s", gameTypeString[k], layer,s.c_str());
+//						t.print();
+//						print();
+//						exit(0);
 						fflush(stdout);
 					}
 				} else if(layer!=maxLayer){
 #ifdef BOARD_LAYER
-					if(layer!=BOARD_LAYER || j>0){
+					if(layer!=BOARD_LAYER || t.countBorderChips()>0){
 						insert(layer, parentCode, i, tcode);
 					}
 #else
@@ -630,7 +693,7 @@ void Reversi::initFirst2Layers(int type,bool bwOnly/*=false*/) {
 	}
 }
 
-std::string Reversi::endGameCounts(int layer) {
+std::string Reversi::endGameCounts(int layer,bool showNoBorder/*=true*/) {
 	std::string s;
 	int i, noBorderCount;
 	size_t j, k = 0;
@@ -651,7 +714,9 @@ std::string Reversi::endGameCounts(int layer) {
 					noBorderCount++;
 				}
 			}
-			s+="{nb"+  toString(noBorderCount,',')+"}";
+			if(showNoBorder){
+				s+="{nb"+  toString(noBorderCount,',')+"}";
+			}
 		}
 	}
 	s += '=' + toString(k, ',');
@@ -677,40 +742,25 @@ std::string Reversi::shortestEndGameCounts(){
 	return s;
 }
 
-void Reversi::test(){
-	//int i, j, k,i1;
-	Reversi r;
-
-	staticInit();
+bool Reversi::test(int p){
+//	Reversi r;
 
 //	init(1);
 //	makeMoves("D3E3F4G3F3C5H3F2C4C3E2E1B3H4H5A3");
 //	print();
 
-	int i,j;
-	ReversiCode c;
-	c.c[0]= 0x148004200400000;
-	c.c[1]=0x400010006a00560;
-	c.moveColor=black;
-	std::set<ReversiCode> set;
-	set.insert(c);
-	printl(c);
-	for (j = 0; j < 2; j++) {
-		r.fromCode(c);
-		if (j) {
-			r = r.flipHorisontal();
-		}
-		for (i = 0; i < 4; i++) {
-			if(j!=0 || i!=0){
-				ReversiCode c1=r.code1();
-				set.insert(c1);
-				printl(r.code1());
+	int i, j;
+	for (i = 1; i <= boardSize; i++) {
+		for (j = 1; j <= boardSize; j++) {
+			auto c=board[i * lineSize + j];
+			if(c!=black && c!=white && c!=empty){
+				print();
+				printl("layer=",p)
+				return true;;
 			}
-			r = r.rotate90();
 		}
 	}
-	printl(set.size())
-
+	return false;
 
 }
 
@@ -762,3 +812,43 @@ void Reversi::setFlip(int n){
 	}
 }
 #endif
+
+int Reversi::getMinChips() const {
+	int i,j;
+	int b=0,w=0;
+	char c;
+	for (i = 1; i <= boardSize; i++) {
+		for (j = 1; j <= boardSize; j++) {
+			c=board[i * lineSize + j];
+			if(c==black){
+				b++;
+			}
+			else if(c==white){
+				w++;
+			}
+		}
+	}
+	return std::min(b,w);
+}
+
+void Reversi::checkMaxMinChips() const {
+//no mt safe
+//	int j=getMinChips();
+//	if(maxMinChips<j){
+//		maxMinChips=j;
+//		printl("found new maxMinChips",j);
+//		print();
+//	}
+}
+
+int Reversi::turns()const{
+	int i,j,k=-4;
+	for (i = 1; i <= boardSize; i++) {
+		for (j = 1; j <= boardSize; j++) {
+			if(board[i * lineSize + j]!=empty){
+				k++;
+			}
+		}
+	}
+	return k;
+}

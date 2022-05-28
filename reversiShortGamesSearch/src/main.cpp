@@ -1,18 +1,33 @@
+#include <thread>
+
 #include "aslov.h"
 #include "Reversi.h"
 
 //https://thesaurus.altervista.org/reversi?tz=airyqU6pTShgK78C&fl=if#e3
 // D3E3F4G3F3C5H3F2C4C3E2E1B3H4H5A3 16turns
 
+const int threads = 5;
+ThreadData threadData[threads];
+
+void threadf(int t, int layer) {
+	auto &a = threadData[t];
+	Reversi r;
+	for (auto it = a.begin; it != a.end; it++) {
+		auto const &code = *it;
+		r.fromCode(code);
+		r.addAllMoves(code, maxLayer - maxLayer1, a);
+	}
+}
+
 int main(){
 	const bool standard = 1;
 	const bool bwOnly=1;
-	const int proceedN=10'000'000;
-	const bool showProceedN=1;
-	int type = standard ? 1 : 3; //type=1 standard, type=3 non standard
+	const bool showNoBorder=false;
+	const int type = standard ? 1 : 3; //type=1 standard, type=3 non standard
+	const int equalCharRepeat=60;
 	Reversi r;
 	std::string s,q;
-	int i,j;
+	int i, j, k, l;
 	size_t psize, ssize;
 	clock_t begin;
 
@@ -29,7 +44,7 @@ int main(){
 //	return 0;
 
 	s=type<2?"standard":"non standard";
-	s+=format(" board %dx%d",boardSize,boardSize);
+	s+=format(" board=%dx%d",boardSize,boardSize);
 #ifndef NDEBUG
 	s+=" DEBUG";
 #endif
@@ -49,48 +64,45 @@ int main(){
 	s+=" boardLayer="+std::to_string(BOARD_LAYER);
 #endif
 
-	s+=" maxLayer="+std::to_string(maxLayer);
+	s+=" maxLayer="+std::to_string(maxLayer1)+"/"+std::to_string(maxLayer);
 	//printan(s)
+
+	s+=" threads="+std::to_string(threads);
 	printl(s)
 
-	for (i = 2; i <= maxLayer; i++) {
+	for (i = 2; i <= maxLayer1; i++) {
 		begin = clock();
-		auto& previousSet = Reversi::layerSet[i-1];
-		auto& set = Reversi::layerSet[i];
+		auto &previousSet = Reversi::layerSet[i - 1];
+		auto &set = Reversi::layerSet[i];
 		psize = previousSet.size();
-		j=0;
+		j = 0;
 		for (auto &code : previousSet) {
 			r.fromCode(code);
-			r.addAllMoves(i,code);
-			if(showProceedN && ++j%proceedN==0){
-				printf("%d.",j/proceedN);
-				fflush(stdout);
-			}
+			r.addAllMoves(i, code);
 		}
 
-		ssize=set.size();
-		if(showProceedN && j>proceedN){
-			printf("\n");
+		ssize = set.size();
+		s = format("%2d %11s bf=", i,
+				i == maxLayer ? "?" : toString(ssize, ',').c_str());
+		s += i == maxLayer ? "?.??" : format("%.2lf", double(ssize) / psize);
+		q = Reversi::endGameCounts(i, showNoBorder);
+		if (q != "0+0+0=0") {
+			s += " " + q;
 		}
-
-		s=format("%2d %11s bf=", i,i==maxLayer ? "?": toString(ssize,',').c_str() );
-		s+=i==maxLayer ? "?.??" : format("%.2lf",double(ssize)/psize);
-		q=Reversi::endGameCounts(i);
-		if(q!="0+0+0=0"){
-			s+=" "+q;
-		}
+#ifdef BORDER_COUNT
 		j=Reversi::borderCount;
 		if(j){
 			s+=" border="+toString(j,',');
 		}
+#endif
 		s+=" "+secondsToString(begin);
 		printl(s);
 		//println("%2d %11s bf=%.2lf %s", i,toString(ssize,',').c_str(),double(ssize)/psize,secondsToString(begin).c_str() )
 		fflush(stdout);
 
-		for(j=0;j<3;j++){
-			Reversi::borderCount=0;
-		}
+#ifdef BORDER_COUNT
+		Reversi::borderCount=0;
+#endif
 		#ifndef STORE_MOVE
 		previousSet.clear();
 		#endif
@@ -100,10 +112,79 @@ int main(){
 		}
 
 	}
-	printi
 
-	printl(	Reversi::shortestEndGameCounts())
+	int layer=i;
+	s=std::string(equalCharRepeat,'=');
+	printl(s);
+	fflush(stdout);
 
+	std::vector<std::thread> vt;
+
+	begin = clock();
+	auto& previousSet = Reversi::layerSet[i-1];
+	j=previousSet.size()/threads;
+	ReversiCodeSetCI it;
+	l=0;
+	k=0;
+	it=previousSet.begin();
+	for(k=0;k<threads;k++){
+		threadData[k].begin=it;
+		std::advance(it, j);
+	}
+	for(k=0;k<threads-1;k++){
+		threadData[k].end=threadData[k+1].begin;
+	}
+	threadData[k].end=previousSet.end();
+
+	for (i = 0; i < threads; ++i) {
+		vt.push_back(std::thread(threadf, i,layer));
+	}
+
+	for (auto& a : vt){
+		a.join();
+	}
+
+//	int maxMinChips=-1;
+	for (i = layer; i <= maxLayer; i++) {
+		s = format("%2d ", i);
+		psize=0;
+		for(j=0;j<3;j++){
+			ReversiCodeSet a;
+			for(l=0;l<threads;l++){
+				a.merge(threadData[l].foundEndCount[i-layer][j]);
+			}
+			psize+=a.size();
+			s+=toString(a.size(),',');
+			s+=j==2 ? '=':'+';
+
+//			for(auto&t:a){
+//				r.fromCode(t);
+//				int j=r.getMinChips();
+//				if(maxMinChips<j){
+//					maxMinChips=j;
+//					printl("found new maxMinChips",j," turns",i);
+//					r.print();
+//				}
+//			}
+		}
+		s+=toString(psize,',');
+		printl(s)
+		;
+	}
+
+	s=format(" layers %d-%d time ", maxLayer1 + 1, maxLayer)+ secondsToString(begin)+" ";
+	i = equalCharRepeat - s.length();
+	q = std::string( i / 2, '=');
+	s = q + s + q;
+	if ( i % 2 ) {
+		s += '=';
+	}
+	printl(s)
+	;
+	fflush(stdout);
+	//getchar();//if run not under eclipse
+
+	//printl(	Reversi::shortestEndGameCounts())
 }
 
 /* file parser for html

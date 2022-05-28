@@ -15,16 +15,22 @@
 #include <vector>
 #include <string>
 
-//allow boardSize > 8
+//allow even boardSize up to 16 if boardSize more than 16 need to change type of boardSize from unsigned char to short
 const int boardSize = 8;
 
 //cut all positions without board chips on this layer, if not defined never cut
-//#define BOARD_LAYER 10
+//#define BOARD_LAYER 11
 
-/* Note. Program do not add endgame positions to layerSet so set not contains all positions
- * all end game positions showed in form 0+66+0=66
- */
-const int maxLayer=12;
+const int maxLayer1=9;//11
+const int maxLayer=maxLayer1+4;
+
+/*
+#define BOARD_LAYER 11
+
+const int maxLayer1=11+3;//11
+const int maxLayer=maxLayer1+2;
+*/
+
 
 /* ifdef USE_SYMMETRY much slower but needs less memory, also "move string" will be invalid
  * 1 or 2 or not defined if symmetry not used
@@ -35,12 +41,14 @@ const int maxLayer=12;
  * USE_SYMMETRY 1 layer 11  36,098,556 bf=6.50 2,199+0+7=2,206 0:51 main.cpp:65 main()
  * USE_SYMMETRY 2 layer 11  36,098,556 bf=6.50 2,199+0+7=2,206 1:06 main.cpp:65 main()
  */
-//#define USE_SYMMETRY 1
+#define USE_SYMMETRY 1
 
 #ifndef USE_SYMMETRY
 	//STORE_MOVE is valid only if USE_SYMMETRY isn't defined
 	#define STORE_MOVE
 #endif
+
+//#define BORDER_COUNT
 
 class ReversiCode{
 public:
@@ -59,6 +67,16 @@ public:
 	bool operator==(ReversiCode const &o) const;
 	std::string toString()const;
 };
+
+using ReversiCodeSet = std::set<ReversiCode>;
+using ReversiCodeSetCI = ReversiCodeSet::const_iterator;
+
+class ThreadData{
+public:
+	ReversiCodeSetCI begin,end;
+	ReversiCodeSet foundEndCount[maxLayer-maxLayer1+1][3];
+};
+
 std::ostream& operator<<(std::ostream& os, const ReversiCode& a);
 
 class Reversi {
@@ -75,11 +93,14 @@ public:
 	static const int BLACK_AND_WHITE=2;
 
 	static std::vector<int> cells, possibleMoves;
-	static std::set<ReversiCode> layerSet[maxLayer+1];
-	static std::set<ReversiCode> found[3];
-	static std::set<ReversiCode> foundEndCount[maxLayer+1][3];
+	static ReversiCodeSet layerSet[maxLayer+1];
+	static ReversiCodeSet found[3];
+	static ReversiCodeSet foundEndCount[maxLayer+1][3];
 	static int foundMinTurns[3];
+	static int maxMinChips;
+#ifdef BORDER_COUNT
 	static int borderCount;
+#endif
 #ifdef STORE_MOVE
 	static std::vector<std::string> foundString[3];
 #endif
@@ -87,7 +108,8 @@ public:
 	static int flip[7][boardSize*boardSize];
 #endif
 
-	char board[boardSize2];
+	//unsigned char allow board size up to 16x16
+	unsigned char board[boardSize2];
 	char moveColor;
 
 	Reversi();
@@ -105,6 +127,7 @@ public:
 	bool isEnd()const;
 	void operator=(Reversi const &re);
 	void addAllMoves(int layer,ReversiCode const& parentCode);
+	void addAllMoves(ReversiCode const& parentCode,int depth,ThreadData&data);
 	int endGameType()const;
 	static void setSearchOnlyBlackAndWhite();
 	static bool allFound(std::string& s);
@@ -121,14 +144,17 @@ public:
 			ReversiCode &code);
 
 	static void initFirst2Layers(int type,bool bwOnly=false);
-	static std::string endGameCounts(int layer);
+	static std::string endGameCounts(int layer,bool showNoBorder=true);
 	static std::string shortestEndGameCounts();
-	void test();
+	bool test(int p);
 	int countBorderChips()const;
 	void fillForFlip();
 #ifdef USE_SYMMETRY
 	void setFlip(int n);
 #endif
+	int getMinChips()const;
+	void checkMaxMinChips()const;
+	int turns()const;
 };
 
 #endif /* REVERSI_H_ */
