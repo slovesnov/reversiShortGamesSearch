@@ -18,7 +18,7 @@
 /* allow even boardSize up to 16 if boardSize more than 16 need to change
  * type of boardSize from unsigned char to short because of fillForFlip() function
  */
-const int boardSize = 12;
+const int boardSize = 12 ;
 
 //cut all positions without board chips on this layer, if not defined never cut
 //#define BOARD_LAYER 11
@@ -55,6 +55,11 @@ const int maxLayer=maxLayer1+3;
 #endif
 
 //#define BORDER_COUNT
+static const char black = 0;
+static const char white = 1;
+static const char empty = 2;
+
+//#define REVERSI_CODE_MOVE_INSIDE
 
 class ReversiCode{
 public:
@@ -67,13 +72,25 @@ public:
 	char parentColor;
 	char move;
 #endif
+
+#ifndef REVERSI_CODE_MOVE_INSIDE
 	//move here "char moveColor;" to make lower sizeof(ReversiCode)
 	char moveColor;
+#endif
 	bool operator<(ReversiCode const &o) const;
 	bool operator==(ReversiCode const &o) const;
 	bool operator!=(ReversiCode const &o) const;
 	//void operator=(ReversiCode const &o);
 	std::string toString()const;
+	static const int d3 =(boardSize*(boardSize/2-1)+boardSize/2)*2-1;
+	static const uint64_t moveN =1ull<<(d3%u64bits);
+#ifdef REVERSI_CODE_MOVE_INSIDE
+	char move()const;
+	void setZero();
+	void setBlackMove();
+	void setWhiteMove();
+#endif
+	void test();
 };
 
 using ReversiCodeSet = std::set<ReversiCode>;
@@ -92,9 +109,6 @@ public:
 	static const int lineSize = boardSize + 1;
 	static const int boardSize2 = (boardSize + 2) * lineSize + 1;
 	static const int upleftCenter = boardSize / 2 * lineSize + boardSize / 2; //analog d3 on 8x8 table
-	static const char black = 0;
-	static const char white = 1;
-	static const char empty = 2;
 	static const int direction[8];
 	static const int BLACK_ONLY=0;
 	static const int WHITE_ONLY=1;

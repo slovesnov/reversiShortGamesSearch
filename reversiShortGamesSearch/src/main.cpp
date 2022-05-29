@@ -36,12 +36,26 @@ int main(){
 	Reversi::initFirst2Layers(type,bwOnly);
 	preventThreadSleep();
 
+//	r.init(1);
+//	r.print();
+//	ReversiCode c=r.code();
+//	c.setBlackMove();
+//	printl(c.move()==black?'b':'w')
+//	r.fromCode(c);
+//	r.print();
+//	return 0;
+
 //	r.test();
 //	return 0;
 //	r.init(1);
 //	r.makeMoves("g6g7g8h8i8i9i10j10e4");
 //	r.print();
 //	return 0;
+
+	char mbstr[100];
+    auto t = std::time(nullptr);
+    std::strftime(mbstr, sizeof(mbstr), "%d%b%Y %H:%M:%S", std::localtime(&t));
+	printl(mbstr);
 
 	s=type<2?"standard":"non standard";
 	s+=format(" board=%dx%d",boardSize,boardSize);

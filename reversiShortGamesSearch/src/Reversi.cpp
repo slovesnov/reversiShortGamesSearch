@@ -44,7 +44,8 @@ bool ReversiCode::operator<(ReversiCode const &o) const {
 		}
 		p++;
 	}
-	return moveColor<o.moveColor;
+	return false;
+//TODO	return moveColor<o.moveColor;
 }
 
 bool ReversiCode::operator ==(const ReversiCode &o) const {
@@ -55,7 +56,8 @@ bool ReversiCode::operator ==(const ReversiCode &o) const {
 		}
 		p++;
 	}
-	return moveColor == o.moveColor;
+	return true;
+	//TODO		return moveColor == o.moveColor;
 }
 
 bool ReversiCode::operator !=(const ReversiCode &o) const {
@@ -84,16 +86,40 @@ std::string ReversiCode::toString()const{
 	for (auto &a : c) {
 		s += format("0x%llx ", a);
 	}
-	if(moveColor==Reversi::black){
+#ifdef REVERSI_CODE_MOVE_INSIDE
+	auto moveColor=move();
+#endif
+	if(moveColor==black){
 		s+="black";
 	}
-	else if(moveColor==Reversi::white){
+	else if(moveColor==white){
 		s+="white";
 	}
 	else{
 		s+=forma(int(moveColor));
 	}
 	return s;
+}
+
+#ifdef REVERSI_CODE_MOVE_INSIDE
+char ReversiCode::move()const{
+	return (c[d3/u64bits]&moveN)!=0 ? black:white;
+}
+
+void ReversiCode::setZero(){
+	c[d3/u64bits]=0;
+}
+
+void ReversiCode::setBlackMove(){
+	c[d3/u64bits] |= moveN;
+}
+
+void ReversiCode::setWhiteMove(){
+	c[d3/u64bits] &= ~moveN;
+}
+#endif
+
+void ReversiCode::test(){
 }
 
 std::ostream& operator<<(std::ostream& os, const ReversiCode& a){
@@ -538,8 +564,12 @@ int Reversi::endGameType() const {
 
 void Reversi::setSearchOnlyBlackAndWhite() {
 	ReversiCode c;
-	//prevents warning
+#ifdef REVERSI_CODE_MOVE_INSIDE
+	c.setZero();
+	c.setBlackMove();
+#else
 	c.moveColor=black;
+#endif
 	found[BLACK_ONLY].insert(c);
 	found[WHITE_ONLY].insert(c);
 }
@@ -672,7 +702,6 @@ ReversiCode Reversi::code() const {
 
 ReversiCode Reversi::code1() const {
 	ReversiCode c;
-	c.moveColor=moveColor;
 	for(auto&a:c.c){
 		a=0;
 	}
@@ -688,12 +717,26 @@ ReversiCode Reversi::code1() const {
 			}
 		}
 	}
+#ifdef REVERSI_CODE_MOVE_INSIDE
+	if(moveColor==black){
+		c.setBlackMove();
+	}
+	else{
+		c.setWhiteMove();
+	}
+#else
+	c.moveColor=moveColor;
+#endif
 	return c;
 }
 
 void Reversi::fromCode(const ReversiCode &c) {
 	const uint64_t *p = c.c;
+#ifdef REVERSI_CODE_MOVE_INSIDE
+	moveColor=c.move();
+#else
 	moveColor=c.moveColor;
+#endif
 	int i, j, k = 0;
 	for (i = 1; i <= boardSize; i++) {
 		for (j = 1; j <= boardSize; j++) {
@@ -705,6 +748,11 @@ void Reversi::fromCode(const ReversiCode &c) {
 			}
 		}
 	}
+#ifdef REVERSI_CODE_MOVE_INSIDE
+	if(moveColor==black){
+		board[upleftCenter]&=1;
+	}
+#endif
 }
 
 void Reversi::insert(int layer, ReversiCode const &parentCode, char move,
