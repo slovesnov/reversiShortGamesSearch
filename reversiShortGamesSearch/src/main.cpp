@@ -2,24 +2,60 @@
 
 #include "aslov.h"
 #include "Reversi.h"
+/* need to search without symmetry otherwise not found
+ * 12x12 standard 17 moves f5e5d5d4d3c3g8d2d1e1f1h8b4b2i8a5a1
+ * 12x12 non standard 17 moves f5e4f4g4f3g2d3e6h1e2d5c6d4g8
+ *
+ *
+ * 8x8 https://thesaurus.altervista.org/reversi?tz=airyqU6pTShgK78C&fl=if#e3
+ * D3E3F4G3F3C5H3F2C4C3E2E1B3H4H5A3 16turns
+ */
 
-//https://thesaurus.altervista.org/reversi?tz=airyqU6pTShgK78C&fl=if#e3
-// D3E3F4G3F3C5H3F2C4C3E2E1B3H4H5A3 16turns
-
-const int threads = 5;
-ThreadData threadData[threads];
+std::vector<ThreadData> threadData;
 
 void threadf(int t, int layer) {
 	auto &a = threadData[t];
+	a.start=clock();
+	double x,time;
 	Reversi r;
+	int i=0;
+#ifdef POTENTIAL_MOVES
+	Reversi p;
+#endif
+
 	for (auto it = a.begin; it != a.end; it++) {
 		auto const &code = *it;
+		a.base=code;
 		r.fromCode(code);
-		r.addAllMoves(code, maxLayer - maxLayer1, a);
+#ifdef POTENTIAL_MOVES
+		p.setPotentialMoves(r);
+#endif
+		r.addAllMoves(code, maxLayer - maxLayer1, a
+#ifdef POTENTIAL_MOVES
+		,p
+#endif
+				);
+		time=timeElapse(a.start);
+		i++;
+		//i - time
+		//all - x  x=time*all/i
+		//left x-time
+		x=time*ThreadData::size/i;
+		if(t==0 && i%10'000==0){
+			println(
+					"proceed %s/%s=%.1lf%% proceed time %s, left time %s, all %s",
+					toString(i, ',').c_str(),
+					toString(ThreadData::size, ',').c_str(),
+					i * 100. / ThreadData::size, secondsToString(time).c_str(),
+					secondsToString(x - time).c_str(),
+					secondsToString(x).c_str());
+			fflush(stdout);
+		}
 	}
 }
 
 int main(){
+	const int threads = getNumberOfCores()-1;
 	const bool standard = 1;
 	const bool bwOnly=1;
 	const bool showNoBorder=false;
@@ -36,26 +72,39 @@ int main(){
 	Reversi::initFirst2Layers(type,bwOnly);
 	preventThreadSleep();
 
-//	r.init(1);
-//	r.print();
-//	ReversiCode c=r.code();
-//	c.setBlackMove();
-//	printl(c.move()==black?'b':'w')
-//	r.fromCode(c);
-//	r.print();
-//	return 0;
+//	r.init(type);
+//	r.makeMoves("f5e4f4");
+//	Reversi::endCode=r.code();
 
+	//without symmetry
+//	ReversiCode code14({0xaa1aaaaa26aaa02aull, 0xaaaaa12aaaaa62aaull, 0xaa4aaaaa92aaaa8eull, 0xaaaaaaaaaaaaaaaaull, 0xaaaaaaaaull});
+//	ReversiCode code17({0xaa0aaaaa22aaa028ull, 0xaaaaa029aaaa26aaull, 0xa80aaaaa82aaaa82ull, 0xaaaaaaaaaaaaaaaaull, 0xaaaaaaaaull});
+//	Reversi::layerSet[1].clear();
+//	Reversi::layerSet[1].insert(code14);
+//	Reversi::endCode=code17;
+//
 //	r.test();
-//	return 0;
-//	r.init(1);
-//	r.makeMoves("g6g7g8h8i8i9i10j10e4");
-//	r.print();
 //	return 0;
 
 	char mbstr[100];
     auto t = std::time(nullptr);
     std::strftime(mbstr, sizeof(mbstr), "%d%b%Y %H:%M:%S", std::localtime(&t));
-	printl(mbstr);
+	s=mbstr;
+
+	s+=" POTENTIAL_MOVES=";
+#ifdef POTENTIAL_MOVES
+	s+="1";
+#else
+	s+="0";
+#endif
+
+	s+=" REVERSI_CODE_MOVE_INSIDE=";
+#ifdef REVERSI_CODE_MOVE_INSIDE
+	s+="1";
+#else
+	s+="0";
+#endif
+	printl(s);
 
 	s=type<2?"standard":"non standard";
 	s+=format(" board=%dx%d",boardSize,boardSize);
@@ -137,10 +186,12 @@ int main(){
 	begin = clock();
 	auto& previousSet = Reversi::layerSet[i-1];
 	j=previousSet.size()/threads;
+	ThreadData::size=j;
 	ReversiCodeSetCI it;
 	l=0;
 	k=0;
 	it=previousSet.begin();
+	threadData.resize(threads);
 	for(k=0;k<threads;k++){
 		threadData[k].begin=it;
 		std::advance(it, j);
