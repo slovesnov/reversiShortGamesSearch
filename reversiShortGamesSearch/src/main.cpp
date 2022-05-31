@@ -16,7 +16,7 @@ void threadf(int t, int layer) {
 	Reversi r;
 	int i=0;
 	Reversi p;
-	std::string s;
+	std::string s,q;
 	const int N=maxLayer<=15 ? 100'000 : 10'000;
 
 	for (auto it = a.begin; it != a.end; it++) {
@@ -33,13 +33,14 @@ void threadf(int t, int layer) {
 		x = time * ThreadData::size / i;
 		if (i % N == 0) {
 			s=format("%4.1lf%%",i * 100. / ThreadData::size);
-			println("t%d %s proceed %s, left %s, all %s", t,s.c_str(),
+			q=timeToString("%d%b%Y %H:%M:%S",true);
+			println("t%d %s %s proceed %s, left %s, all %s", t,s.c_str(),q.c_str(),
 					 secondsToString(time).c_str(),
 					secondsToString(x - time).c_str(),
 					secondsToString(x).c_str());
 			fflush(stdout);
 			std::ofstream f("o"+std::to_string(t)+".txt");
-			f<<i<<" "<<ThreadData::size<<" "<<s;
+			f<<i<<" "<<ThreadData::size<<" "<<s<<" "<<q;
 		}
 	}
 }
@@ -75,12 +76,7 @@ int main(){
 //	r.test();
 //	return 0;
 
-	const int mbstrSize=100;
-	char mbstr[mbstrSize];
-    auto t = std::time(nullptr);
-    std::strftime(mbstr, mbstrSize, "%d%b%Y %H:%M:%S", std::localtime(&t));
-    std::transform(mbstr, mbstr+mbstrSize, mbstr,tolower );
-	s=mbstr;
+	s=timeToString("%d%b%Y %H:%M:%S",true);
 
 	s+=" REVERSI_CODE_MOVE_INSIDE=";
 #ifdef REVERSI_CODE_MOVE_INSIDE
