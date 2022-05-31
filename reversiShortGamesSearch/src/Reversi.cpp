@@ -8,6 +8,7 @@
  */
 #include <cassert>
 #include <cstring>
+#include <iostream>
 
 #include "Reversi.h"
 #include "aslov.h"
@@ -42,122 +43,6 @@ const char outChar[]="bw.";
 const char *gameTypeString[]={
 		"black only","white only","black and white"
 };
-
-ReversiCode::ReversiCode(std::initializer_list<uint64_t> array
-#ifndef REVERSI_CODE_MOVE_INSIDE
-			,char move
-#endif
-		){
-	auto p=c;
-	for(auto&a:array){
-		*p++=a;
-	}
-#ifndef REVERSI_CODE_MOVE_INSIDE
-	moveColor=move;
-#endif
-
-}
-
-bool ReversiCode::operator<(ReversiCode const &o) const {
-	auto p=o.c;
-	for(auto&a:c){
-		if(a!=*p){
-			return a<*p;
-		}
-		p++;
-	}
-#ifdef REVERSI_CODE_MOVE_INSIDE
-	return false;
-#else
-	return moveColor<o.moveColor;
-#endif
-}
-
-bool ReversiCode::operator ==(const ReversiCode &o) const {
-	auto p = o.c;
-	for (auto &a : c) {
-		if (a != *p) {
-			return false;
-		}
-		p++;
-	}
-#ifdef REVERSI_CODE_MOVE_INSIDE
-	return true;
-#else
-	return moveColor == o.moveColor;
-#endif
-}
-
-bool ReversiCode::operator !=(const ReversiCode &o) const {
-	return !(*this == o);
-}
-/*
-void ReversiCode::operator =(const ReversiCode &o) {
-	int i=0;
-	for (auto &a : c) {
-		a= o.c[i++];
-	}
-#ifdef STORE_MOVE
-	//not tested
-	i=0;
-	for (auto &a : parent) {
-		a= o.parent[i++];
-	}
-	parentColor=o.parentColor;
-	move=o.move;
-#endif
-	moveColor=o.moveColor;
-}*/
-
-std::string ReversiCode::toString()const{
-	std::string s;
-	int i=0;
-	for (auto &a : c) {
-		s += format("%s0x%llxull",i?", ":"{", a);
-		i++;
-	}
-	s+="};";
-#ifdef REVERSI_CODE_MOVE_INSIDE
-	auto moveColor=getMove();
-#endif
-	if(moveColor==black){
-		s+="black";
-	}
-	else if(moveColor==white){
-		s+="white";
-	}
-	else{
-		s+=forma(int(moveColor));
-	}
-	return s;
-}
-
-#ifdef REVERSI_CODE_MOVE_INSIDE
-char ReversiCode::getMove()const{
-	return (c[d3/u64bits]&moveN)!=0 ? black:white;
-}
-
-void ReversiCode::setBlackMove(){
-	c[d3/u64bits] |= moveN;
-}
-
-void ReversiCode::setWhiteMove(){
-	c[d3/u64bits] &= ~moveN;
-}
-#endif
-
-void ReversiCode::test(){
-}
-
-int ReversiCode::turns()const{
-	Reversi r(*this);
-	return r.turns();
-}
-
-std::ostream& operator<<(std::ostream& os, const ReversiCode& a){
-    os << a.toString();
-    return os;
-}
 
 void Reversi::staticInit() {
 	int i, j, k;
@@ -232,32 +117,7 @@ void Reversi::init(int type/*=0*/) {
 }
 
 void Reversi::print() const {
-	int i, j,l;
-	const int k=boardSize>=10?2:1;
-	char c;
-	std::string s = " ";
-	if(k==2){
-		s+=" ";
-	}
-	for (i = 0, c = 'a'; i < boardSize; i++, c++) {
-		s += c;
-	}
-	s += " \n";
-	printf("%s", s.c_str());
-	for (i = 1; i <= boardSize; i++) {
-		printf("%*d",k, i);
-		for (j = 1; j <= boardSize; j++) {
-			l=board[i * lineSize + j];
-			if(l<3){
-				printf("%c", outChar[l]);
-			}
-			else{
-				printf("%x", l);
-			}
-		}
-		printf("%d\n", i);
-	}
-	printf("%s", s.c_str());
+	std::cout<<toString();
 }
 
 bool Reversi::makeMove(int index) {
@@ -380,6 +240,36 @@ void Reversi::operator =(const Reversi &re) {
 
 void Reversi::operator=(ReversiCode const& code){
 	fromCode(code);
+}
+
+std::string Reversi::toString()const{
+	int i, j,l;
+	const int k=boardSize>=10?2:1;
+	char c;
+	std::string s,q = " ";
+	if(k==2){
+		q+=" ";
+	}
+	for (i = 0, c = 'a'; i < boardSize; i++, c++) {
+		q += c;
+	}
+	q += " \n";
+	s=q;
+	for (i = 1; i <= boardSize; i++) {
+		s+=format("%*d",k, i);
+		for (j = 1; j <= boardSize; j++) {
+			l=board[i * lineSize + j];
+			if(l<3){
+				s+=format("%c", outChar[l]);
+			}
+			else{
+				s+=format("%x", l);
+			}
+		}
+		s+=format("%d\n", i);
+	}
+	s+=q;
+	return s;
 }
 
 void Reversi::addAllMoves(int layer,ReversiCode const& parentCode)const  {
@@ -530,7 +420,7 @@ void Reversi::addAllMoves(ReversiCode const &parentCode, int depth,
 						if (boardSize >= 12 && k == BLACK_AND_WHITE) {
 							Reversi r;
 
-							auto &c = data.base;
+							auto &c = data.root;
 							printl(c)
 							;
 							r=c;
@@ -545,6 +435,7 @@ void Reversi::addAllMoves(ReversiCode const &parentCode, int depth,
 							printl("found "+std::to_string(r.turns())+" turns thread time "+secondsToString(data.start))
 							;
 							fflush(stdout);
+							saveFoundedToFile(c, data);
 							exit(0);
 						}
 					}
@@ -599,6 +490,9 @@ void Reversi::addAllMoves(ReversiCode const &parentCode, int depth,
 			Reversi r(parentCode);
 			r.print();
 			println("found1 %d turns", r.turns());
+			fflush(stdout);
+			saveFoundedToFile(parentCode, data);
+			exit(0);
 		}
 	}
 #endif
@@ -857,7 +751,7 @@ std::string Reversi::endGameCounts(int layer,bool showNoBorder/*=true*/) {
 		if (i && !searchBWOnly) {
 			s += '+';
 		}
-		s += toString(j, ',');
+		s += ::toString(j, ',');
 		if (j) {
 			noBorderCount= 0;
 			for (auto &a : set) {
@@ -868,12 +762,12 @@ std::string Reversi::endGameCounts(int layer,bool showNoBorder/*=true*/) {
 				}
 			}
 			if(showNoBorder){
-				s+="{nb"+  toString(noBorderCount,',')+"}";
+				s+="{nb"+  ::toString(noBorderCount,',')+"}";
 			}
 		}
 	}
 	if (!searchBWOnly) {
-		s += '=' + toString(k, ',');
+		s += '=' + ::toString(k, ',');
 	}
 	return s;
 }
@@ -886,7 +780,7 @@ std::string Reversi::shortestEndGameCounts(){
 		for (layer = 2; layer <= maxLayer; layer++) {
 			j = foundEndCount[layer][i].size();
 			if (j) {
-				s += toString(j, ',') + ",";
+				s += ::toString(j, ',') + ",";
 				break;
 			}
 		}
@@ -1015,4 +909,17 @@ void Reversi::addPotentialMove(int i) {
 	for(auto&a:direction){
 		board[i+a]|=1;
 	}
+}
+
+std::ostream& operator<<(std::ostream& os, const Reversi& a){
+    os << a.toString();
+    return os;
+}
+
+void Reversi::saveFoundedToFile(const ReversiCode &c,
+		const ThreadData &data) {
+	Reversi r=c;
+	std::ofstream f("f"+std::to_string(data.index)+".txt");
+	f<<r<<"\nturns"<<r.turns()<<"\n"<<c;
+	f.close();
 }

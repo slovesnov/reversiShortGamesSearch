@@ -14,14 +14,23 @@ void threadf(int t, int layer) {
 	a.start=clock();
 	double x,time;
 	Reversi r;
-	int i=0;
+	int i=0,j=0;
 	Reversi p;
 	std::string s,q;
 	const int N=maxLayer<=15 ? 100'000 : 10'000;
 
+	std::ifstream f("c:/slovesno/reversi/o"+std::to_string(a.index)+".txt");
+	if(f.is_open()){
+		f>>j;
+	}
+
 	for (auto it = a.begin; it != a.end; it++) {
+		if(i<j){
+			i++;
+//			continue;
+		}
 		auto const &code = *it;
-		a.base=code;
+		a.root=code;
 		r.fromCode(code);
 		p.setPotentialMoves(r);
 		r.addAllMoves(code, maxLayer - maxLayer1, a, p);
@@ -43,6 +52,9 @@ void threadf(int t, int layer) {
 			f<<i<<" "<<ThreadData::size<<" "<<s<<" "<<q;
 		}
 	}
+	q=timeToString("%d%b%Y %H:%M:%S",true);
+	println("t%d %s finished", t,q.c_str());
+	fflush(stdout);
 }
 
 int main(){
@@ -64,6 +76,15 @@ int main(){
 
 //	r.init(type);
 //	r.makeMoves("f5e4f4");
+//	printl(r)
+//	r.print();
+//
+
+//	std::ifstream f("c:/slovesno/reversi/o"+std::to_string(0)+".txt");
+//	f>>i;
+//	printl(i)
+//	return 0;
+
 //	Reversi::endCode=r.code();
 
 	//without symmetry
@@ -173,7 +194,9 @@ int main(){
 	it=previousSet.begin();
 	threadData.resize(threads);
 	for(k=0;k<threads;k++){
-		threadData[k].begin=it;
+		auto&a=threadData[k];
+		a.begin=it;
+		a.index=k;
 		std::advance(it, j);
 	}
 	for(k=0;k<threads-1;k++){
@@ -193,16 +216,20 @@ int main(){
 	for (i = layer; i <= maxLayer; i++) {
 		s = format("%2d ", i);
 		psize = 0;
-		for (j = 0; j < 3; j++) {
+		for (j = searchBWOnly?2:0; j < 3; j++) {
 			a.clear();
 			for (l = 0; l < threads; l++) {
 				a.merge(threadData[l].foundEndCount[i - layer][j]);
 			}
 			psize += a.size();
 			s += toString(a.size(), ',');
-			s += j == 2 ? '=' : '+';
+			if (!searchBWOnly) {
+				s += j == 2 ? '=' : '+';
+			}
 		}
-		s += toString(psize, ',');
+		if (!searchBWOnly) {
+			s += toString(psize, ',');
+		}
 		printl(s)
 		;
 	}
