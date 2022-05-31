@@ -16,7 +16,7 @@ std::vector<int> Reversi::cells,Reversi::possibleMoves;
 ReversiCodeSet Reversi::layerSet[maxLayer+1];
 ReversiCodeSet Reversi::found[3];
 ReversiCodeSet Reversi::foundEndCount[maxLayer+1][3];
-int Reversi::foundMinTurns[3];
+int Reversi::foundMinTurns[3]={255,255,255};
 int Reversi::maxMinChips=-1;
 #ifdef BORDER_COUNT
 int Reversi::borderCount;
@@ -135,10 +135,6 @@ std::string ReversiCode::toString()const{
 #ifdef REVERSI_CODE_MOVE_INSIDE
 char ReversiCode::getMove()const{
 	return (c[d3/u64bits]&moveN)!=0 ? black:white;
-}
-
-void ReversiCode::setZero(){
-	c[d3/u64bits]=0;
 }
 
 void ReversiCode::setBlackMove(){
@@ -396,19 +392,15 @@ void Reversi::addAllMoves(int layer,ReversiCode const& parentCode)const  {
 	ReversiCode tcode;
 	std::string s;
 
-#ifdef POTENTIAL_MOVES
 	Reversi p;
 	p.setPotentialMoves(*this);
-#endif
 
 	for (l = 0; l < 2; l++) {
 		t.assign(*this, l == 0 ? moveColor : oppositeColor(moveColor));
 		for (int i : possibleMoves) {
-#ifdef POTENTIAL_MOVES
 			if(p.board[i]!=1){
 				continue;
 			}
-#endif
 
 			if (t.makeMove(i)) {
 				f = true;
@@ -448,12 +440,18 @@ void Reversi::addAllMoves(int layer,ReversiCode const& parentCode)const  {
 
 				if (t.isEnd()) {
 					k = t.endGameType();
-					foundEndCount[layer][k].insert(tcode);
-
+					if( (searchBWOnly && k == BLACK_AND_WHITE) || !searchBWOnly ){
+						foundEndCount[layer][k].insert(tcode);
+					}
 					//output/count all positions with black and white colors
-					if (found[k].empty()
-							|| (k == BLACK_AND_WHITE && foundMinTurns[k] == layer
-									&& found[k].find(tcode) == found[k].end())) {
+					bool b = ((searchBWOnly && k == BLACK_AND_WHITE) || !searchBWOnly) && found[k].empty();
+					if (!b) {
+						if (k == BLACK_AND_WHITE) {
+							b = foundMinTurns[k] >= layer
+									&& found[k].find(tcode) == found[k].end();
+						}
+					}
+					if(b){
 						found[k].insert(tcode);
 						foundMinTurns[k]=layer;
 #ifdef STORE_MOVE
@@ -479,9 +477,6 @@ void Reversi::addAllMoves(int layer,ReversiCode const& parentCode)const  {
 						s="lastmove "+indexToString(i);
 #endif
 						println("found %s %d turns %s", gameTypeString[k], layer,s.c_str());
-//						t.print();
-//						print();
-//						exit(0);
 						fflush(stdout);
 					}
 				} else if(layer!=maxLayer){
@@ -502,11 +497,8 @@ void Reversi::addAllMoves(int layer,ReversiCode const& parentCode)const  {
 	}
 }
 
-void Reversi::addAllMoves(ReversiCode const& parentCode,int depth,ThreadData&data
-#ifdef POTENTIAL_MOVES
-			,Reversi& p
-#endif
-		)const{
+void Reversi::addAllMoves(ReversiCode const &parentCode, int depth,
+		ThreadData &data, Reversi &p) const {
 	int k, l;
 	bool f = false;
 	Reversi t;
@@ -516,18 +508,14 @@ void Reversi::addAllMoves(ReversiCode const& parentCode,int depth,ThreadData&dat
 //if #define AFTER faster 4:15/4:37 speed up 22/(4*60+37)*100=7.9%
 #define AFTER
 
-#ifdef POTENTIAL_MOVES
 	Reversi p1;
-#endif
 
 	for (l = 0; l < 2; l++) {
 		t.assign(*this, l == 0 ? moveColor : oppositeColor(moveColor));
 		for (int i : possibleMoves) {
-#ifdef POTENTIAL_MOVES
 			if(p.board[i]!=1){
 				continue;
 			}
-#endif
 
 			if (t.makeMove(i)) {
 				f = true;
@@ -536,7 +524,9 @@ void Reversi::addAllMoves(ReversiCode const& parentCode,int depth,ThreadData&dat
 					if (t.isEnd()) {
 						tcode=t.code();
 						k = t.endGameType();
-						data.foundEndCount[layer][k].insert(tcode);
+						if((searchBWOnly && k==BLACK_AND_WHITE) || !searchBWOnly){
+							data.foundEndCount[layer][k].insert(tcode);
+						}
 						if (boardSize >= 12 && k == BLACK_AND_WHITE) {
 							Reversi r;
 
@@ -561,15 +551,9 @@ void Reversi::addAllMoves(ReversiCode const& parentCode,int depth,ThreadData&dat
 				}
 				else{
 					tcode = t.code();
-#ifdef POTENTIAL_MOVES
 					p1.copyBoard(p);
 					p1.addPotentialMove(i);
-#endif
-					t.addAllMoves(tcode, depth - 1, data
-#ifdef POTENTIAL_MOVES
-							, p1
-#endif
-							);
+					t.addAllMoves(tcode, depth - 1, data, p1);
 				}
 				t.assign(*this, l == 0 ? moveColor : oppositeColor(moveColor));
 #else
@@ -608,7 +592,9 @@ void Reversi::addAllMoves(ReversiCode const& parentCode,int depth,ThreadData&dat
 #ifdef AFTER
 	if(layer>0){
 		k = endGameType();
-		data.foundEndCount[layer-1][k].insert(parentCode);
+		if((searchBWOnly && k==BLACK_AND_WHITE) || !searchBWOnly){
+			data.foundEndCount[layer-1][k].insert(parentCode);
+		}
 		if (boardSize >= 12 && k == BLACK_AND_WHITE) {
 			Reversi r(parentCode);
 			r.print();
@@ -636,18 +622,6 @@ int Reversi::endGameType() const {
 	} else {
 		return WHITE_ONLY;
 	}
-}
-
-void Reversi::setSearchOnlyBlackAndWhite() {
-	ReversiCode c;
-#ifdef REVERSI_CODE_MOVE_INSIDE
-	c.setZero();
-	c.setBlackMove();
-#else
-	c.moveColor=black;
-#endif
-	found[BLACK_ONLY].insert(c);
-	found[WHITE_ONLY].insert(c);
 }
 
 void Reversi::assign(const Reversi &re,char _move) {
@@ -851,14 +825,10 @@ void Reversi::insert(int layer, ReversiCode const &parentCode, char move,
 	layerSet[layer].insert(code);
 }
 
-void Reversi::initFirst2Layers(int type,bool bwOnly/*=false*/) {
+void Reversi::initFirst2Layers(int type) {
 	int i;
 	Reversi r, ro;
 	ReversiCode co, c;
-
-	if(bwOnly){
-		setSearchOnlyBlackAndWhite();
-	}
 
 	ro.init(type);
 	co = ro.code();
@@ -878,10 +848,13 @@ std::string Reversi::endGameCounts(int layer,bool showNoBorder/*=true*/) {
 	int i, noBorderCount;
 	size_t j, k = 0;
 	for (i = 0; i < 3; i++) {
+		if(searchBWOnly && i!=BLACK_AND_WHITE){
+			continue;
+		}
 		auto &set = foundEndCount[layer][i];
 		j = set.size();
 		k += j;
-		if (i) {
+		if (i && !searchBWOnly) {
 			s += '+';
 		}
 		s += toString(j, ',');
@@ -899,7 +872,9 @@ std::string Reversi::endGameCounts(int layer,bool showNoBorder/*=true*/) {
 			}
 		}
 	}
-	s += '=' + toString(k, ',');
+	if (!searchBWOnly) {
+		s += '=' + toString(k, ',');
+	}
 	return s;
 }
 

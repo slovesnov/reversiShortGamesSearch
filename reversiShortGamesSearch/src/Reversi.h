@@ -21,10 +21,13 @@
 const int boardSize = 12;
 
 //cut all positions without board chips on this layer, if not defined never cut
-//#define BOARD_LAYER 11
+//#define BOARD_LAYER 9
 
-const int maxLayer1=8;//11
-const int maxLayer=maxLayer1+5;//maxLayer1+5
+const int maxLayer1=11;
+const int maxLayer=maxLayer1+5;
+
+//const int maxLayer1=12;
+//const int maxLayer=maxLayer1+3;//maxLayer1+5
 
 
 //const int boardSize = 12;
@@ -52,6 +55,8 @@ const int maxLayer=maxLayer1+5;//maxLayer1+5
 	#define STORE_MOVE
 #endif
 
+const bool searchBWOnly=1;
+
 
 //#define BORDER_COUNT
 static const char black = 0;
@@ -59,10 +64,8 @@ static const char white = 1;
 static const char empty = 2;
 
 //when REVERSI_CODE_MOVE_INSIDE is NOT defined programs faster 1-(6*60+10)/(6*60+55)=10.8%
+//REVERSI_CODE_MOVE_INSIDE is smaller sizeof(ReversiCode)
 //#define REVERSI_CODE_MOVE_INSIDE
-
-//when POTENTIAL_MOVES is defined programs faster 1-(6*60+10)/(7*60+34)=18.5%
-#define POTENTIAL_MOVES
 
 class ReversiCode{
 public:
@@ -97,7 +100,6 @@ public:
 			- 1;
 	static const uint64_t moveN = 1ull << (d3 % u64bits);
 	char getMove()const;
-	void setZero();
 	void setBlackMove();
 	void setWhiteMove();
 #endif
@@ -170,13 +172,9 @@ public:
 	void operator=(Reversi const &re);
 	void operator=(ReversiCode const& code);
 	void addAllMoves(int layer,ReversiCode const& parentCode)const;
-	void addAllMoves(ReversiCode const& parentCode,int depth,ThreadData&data
-#ifdef POTENTIAL_MOVES
-			,Reversi& p
-#endif
-	)const;
+	void addAllMoves(ReversiCode const &parentCode, int depth, ThreadData &data,
+			Reversi &p) const;
 	int endGameType()const;
-	static void setSearchOnlyBlackAndWhite();
 	static bool allFound(std::string& s);
 
 	void fillChars();
@@ -190,7 +188,7 @@ public:
 	static void insert(int layer, ReversiCode const &parentCode, char move,
 			ReversiCode &code);
 
-	static void initFirst2Layers(int type,bool bwOnly=false);
+	static void initFirst2Layers(int type);
 	static std::string endGameCounts(int layer,bool showNoBorder=true);
 	static std::string shortestEndGameCounts();
 	bool test(int p=0);

@@ -2,11 +2,7 @@
 
 #include "aslov.h"
 #include "Reversi.h"
-/* need to search without symmetry otherwise not found
- * 12x12 standard 17 moves f5e5d5d4d3c3g8d2d1e1f1h8b4b2i8a5a1
- * 12x12 non standard 17 moves f5e4f4g4f3g2d3e6h1e2d5c6d4g8
- *
- *
+/*
  * 8x8 https://thesaurus.altervista.org/reversi?tz=airyqU6pTShgK78C&fl=if#e3
  * D3E3F4G3F3C5H3F2C4C3E2E1B3H4H5A3 16turns
  */
@@ -19,37 +15,31 @@ void threadf(int t, int layer) {
 	double x,time;
 	Reversi r;
 	int i=0;
-#ifdef POTENTIAL_MOVES
 	Reversi p;
-#endif
+	std::string s;
+	const int N=maxLayer<=15 ? 100'000 : 10'000;
 
 	for (auto it = a.begin; it != a.end; it++) {
 		auto const &code = *it;
 		a.base=code;
 		r.fromCode(code);
-#ifdef POTENTIAL_MOVES
 		p.setPotentialMoves(r);
-#endif
-		r.addAllMoves(code, maxLayer - maxLayer1, a
-#ifdef POTENTIAL_MOVES
-		,p
-#endif
-				);
+		r.addAllMoves(code, maxLayer - maxLayer1, a, p);
 		time=timeElapse(a.start);
 		i++;
 		//i - time
 		//all - x  x=time*all/i
 		//left x-time
-		x=time*ThreadData::size/i;
-		if(t==0 && i%10'000==0){
-			println(
-					"proceed %s/%s=%.1lf%% proceed time %s, left time %s, all %s",
-					toString(i, ',').c_str(),
-					toString(ThreadData::size, ',').c_str(),
-					i * 100. / ThreadData::size, secondsToString(time).c_str(),
+		x = time * ThreadData::size / i;
+		if (i % N == 0) {
+			s=format("%4.1lf%%",i * 100. / ThreadData::size);
+			println("t%d %s proceed %s, left %s, all %s", t,s.c_str(),
+					 secondsToString(time).c_str(),
 					secondsToString(x - time).c_str(),
 					secondsToString(x).c_str());
 			fflush(stdout);
+			std::ofstream f("o"+std::to_string(t)+".txt");
+			f<<i<<" "<<ThreadData::size<<" "<<s;
 		}
 	}
 }
@@ -57,7 +47,6 @@ void threadf(int t, int layer) {
 int main(){
 	const int threads = getNumberOfCores()-1;
 	const bool standard = 1;
-	const bool bwOnly=1;
 	const bool showNoBorder=false;
 	const int type = standard ? 1 : 3; //type=1 standard, type=3 non standard
 	const int equalCharRepeat=60;
@@ -69,7 +58,7 @@ int main(){
 
 	aslovSetOutputWidth(60);
 	Reversi::staticInit();
-	Reversi::initFirst2Layers(type,bwOnly);
+	Reversi::initFirst2Layers(type);
 	preventThreadSleep();
 
 //	r.init(type);
@@ -86,17 +75,12 @@ int main(){
 //	r.test();
 //	return 0;
 
-	char mbstr[100];
+	const int mbstrSize=100;
+	char mbstr[mbstrSize];
     auto t = std::time(nullptr);
-    std::strftime(mbstr, sizeof(mbstr), "%d%b%Y %H:%M:%S", std::localtime(&t));
+    std::strftime(mbstr, mbstrSize, "%d%b%Y %H:%M:%S", std::localtime(&t));
+    std::transform(mbstr, mbstr+mbstrSize, mbstr,tolower );
 	s=mbstr;
-
-	s+=" POTENTIAL_MOVES=";
-#ifdef POTENTIAL_MOVES
-	s+="1";
-#else
-	s+="0";
-#endif
 
 	s+=" REVERSI_CODE_MOVE_INSIDE=";
 #ifdef REVERSI_CODE_MOVE_INSIDE
@@ -114,7 +98,7 @@ int main(){
 #ifdef USE_SYMMETRY
 	s+=" symmetry="+forma(USE_SYMMETRY);
 #endif
-	s+=" bwOnly="+std::to_string(bwOnly);
+	s+=" searchBWOnly="+std::to_string(searchBWOnly);
 
 	s+=" storeMove=";
 #ifdef STORE_MOVE
@@ -124,7 +108,7 @@ int main(){
 #endif
 
 #ifdef BOARD_LAYER
-	s+=" boardLayer="+std::to_string(BOARD_LAYER);
+	s+=" BOARD_LAYER="+std::to_string(BOARD_LAYER);
 #endif
 
 	s+=" maxLayer="+std::to_string(maxLayer1)+"/"+std::to_string(maxLayer);
@@ -149,7 +133,7 @@ int main(){
 				i == maxLayer ? "?" : toString(ssize, ',').c_str());
 		s += i == maxLayer ? "?.??" : format("%.2lf", double(ssize) / psize);
 		q = Reversi::endGameCounts(i, showNoBorder);
-		if (q != "0+0+0=0") {
+		if (q != "0+0+0=0" && q!="0") {
 			s += " " + q;
 		}
 #ifdef BORDER_COUNT
@@ -209,30 +193,20 @@ int main(){
 		a.join();
 	}
 
-//	int maxMinChips=-1;
+	ReversiCodeSet a;
 	for (i = layer; i <= maxLayer; i++) {
 		s = format("%2d ", i);
-		psize=0;
-		for(j=0;j<3;j++){
-			ReversiCodeSet a;
-			for(l=0;l<threads;l++){
-				a.merge(threadData[l].foundEndCount[i-layer][j]);
+		psize = 0;
+		for (j = 0; j < 3; j++) {
+			a.clear();
+			for (l = 0; l < threads; l++) {
+				a.merge(threadData[l].foundEndCount[i - layer][j]);
 			}
-			psize+=a.size();
-			s+=toString(a.size(),',');
-			s+=j==2 ? '=':'+';
-
-//			for(auto&t:a){
-//				r.fromCode(t);
-//				int j=r.getMinChips();
-//				if(maxMinChips<j){
-//					maxMinChips=j;
-//					printl("found new maxMinChips",j," turns",i);
-//					r.print();
-//				}
-//			}
+			psize += a.size();
+			s += toString(a.size(), ',');
+			s += j == 2 ? '=' : '+';
 		}
-		s+=toString(psize,',');
+		s += toString(psize, ',');
 		printl(s)
 		;
 	}
