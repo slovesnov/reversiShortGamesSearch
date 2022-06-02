@@ -59,7 +59,7 @@ int main(){
 	const int threads = getNumberOfCores()-1;
 	const bool standard = 0;
 	const bool showNoBorder=false;
-	const int type = standard ? 1 : 3; //type=1 standard, type=3 non standard
+	const int type = standard ? 1 : 3;
 	const int equalCharRepeat=60;
 	Reversi r;
 	std::string s,q;
