@@ -17,20 +17,15 @@
 const int boardSize = 12;
 
 //cut all positions without board chips on this layer, if not defined never cut
-//#define BOARD_LAYER 9
-//const int maxLayer1=15;
-//const int maxLayer=17;
-
+//#define BOARD_LAYER 11
 const int maxLayer1=11;
-const int maxLayer=15;
+const int maxLayer=16;
 
+//original
+//const int maxLayer1=11;
+//const int maxLayer=16;
 
-
-//const int boardSize = 12;
-//#define BOARD_LAYER 9
-//const int maxLayer1=11+3;//11
-//const int maxLayer=maxLayer1+3;
-
+//for searching moves
 //#define SEARCH_MOVES
 
 /* ifdef USE_SYMMETRY much slower but needs less memory, also "move string" will be invalid

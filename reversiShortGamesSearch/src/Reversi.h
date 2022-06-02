@@ -12,6 +12,7 @@
 #define REVERSI_H_
 
 #include <vector>
+#include <mutex>
 
 #include "ThreadData.h"
 
@@ -46,7 +47,9 @@ public:
 	char moveColor;
 #ifdef SEARCH_MOVES
 	static ReversiCode endCode;
+	static bool searchFromStart;
 #endif
+	static std::mutex mtx;
 
 	Reversi();
 	Reversi(ReversiCode const& code);
@@ -64,7 +67,7 @@ public:
 	static char oppositeColor(char c);
 	bool isEnd()const;
 	void operator=(Reversi const &re);
-	void operator=(ReversiCode const& code);
+	void operator=(ReversiCode const& c);
 	std::string toString()const;
 	void addAllMoves(int layer,ReversiCode const& parentCode)const;
 	void addAllMoves(ReversiCode const &parentCode, int depth, ThreadData &data,
@@ -79,7 +82,6 @@ public:
 	std::string toCharString();
 	ReversiCode code1()const;
 	ReversiCode code()const;
-	void fromCode(ReversiCode const& c);
 	static void insert(int layer, ReversiCode const &parentCode, char move,
 			ReversiCode &code);
 
@@ -96,7 +98,11 @@ public:
 	int turns()const;
 	void setPotentialMoves(Reversi const& r);
 	void addPotentialMove(int i);
-	static void saveFoundedToFile(ReversiCode const&c,ThreadData const&data);
+	static void outSaveFoundedToFile(const ReversiCode& code,ThreadData const&data,int line);
+#ifdef SEARCH_MOVES
+	static void searchMoves(ReversiCode const& code);
+	static void searchMoves(ReversiCode const& from,ReversiCode const& to);
+#endif
 };
 
 std::ostream& operator<<(std::ostream& os, const Reversi& a);

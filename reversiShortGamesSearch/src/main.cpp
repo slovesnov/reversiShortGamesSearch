@@ -19,37 +19,35 @@ void threadf(int t, int layer) {
 	std::string s,q;
 	const int N=maxLayer<=15 ? 100'000 : 10'000;
 
-	std::ifstream f("c:/slovesno/reversi/o"+std::to_string(a.index)+".txt");
+//	std::ifstream f("c:/slovesno/reversi/o"+std::to_string(a.index)+".txt");
+	std::ifstream f("o"+std::to_string(a.index)+".txt");
 	if(f.is_open()){
 		f>>j;
 	}
+	auto it = a.begin;
+	std::advance(it,j);
+	i+=j;
 
-	for (auto it = a.begin; it != a.end; it++) {
-		if(i<j){
-			i++;
-//			continue;
-		}
+	for (; it != a.end; it++) {
 		auto const &code = *it;
 		a.root=code;
-		r.fromCode(code);
+		r=code;
 		p.setPotentialMoves(r);
 		r.addAllMoves(code, maxLayer - maxLayer1, a, p);
 		time=timeElapse(a.start);
 		i++;
-		//i - time
-		//all - x  x=time*all/i
-		//left x-time
-		x = time * ThreadData::size / i;
+		//i-j - time
+		//left size-i left=time*(size-i)/(i-j)
+
+		x = time * (ThreadData::size-i) / (i - j);
 		if (i % N == 0) {
-			s=format("%4.1lf%%",i * 100. / ThreadData::size);
-			q=timeToString("%d%b%Y %H:%M:%S",true);
-			println("t%d %s %s proceed %s, left %s, all %s", t,s.c_str(),q.c_str(),
-					 secondsToString(time).c_str(),
-					secondsToString(x - time).c_str(),
+			s = format("%4.1lf%% %dk/%dk", i * 100. / ThreadData::size,i/1000,ThreadData::size/1000);
+			q = timeToString("%d%b%Y %H:%M:%S", true);
+			println("t%d %s %s left %s", t, s.c_str(), q.c_str(),
 					secondsToString(x).c_str());
 			fflush(stdout);
-			std::ofstream f("o"+std::to_string(t)+".txt");
-			f<<i<<" "<<ThreadData::size<<" "<<s<<" "<<q;
+			std::ofstream f("o" + std::to_string(t) + ".txt");
+			f << i << " " << ThreadData::size << " " << s << " " << q;
 		}
 	}
 	q=timeToString("%d%b%Y %H:%M:%S",true);
@@ -59,7 +57,7 @@ void threadf(int t, int layer) {
 
 int main(){
 	const int threads = getNumberOfCores()-1;
-	const bool standard = 1;
+	const bool standard = 0;
 	const bool showNoBorder=false;
 	const int type = standard ? 1 : 3; //type=1 standard, type=3 non standard
 	const int equalCharRepeat=60;
@@ -74,26 +72,22 @@ int main(){
 	Reversi::initFirst2Layers(type);
 	preventThreadSleep();
 
-//	r.init(type);
-//	r.makeMoves("f5e4f4");
-//	printl(r)
-//	r.print();
-//
 
-//	std::ifstream f("c:/slovesno/reversi/o"+std::to_string(0)+".txt");
-//	f>>i;
-//	printl(i)
-//	return 0;
+	/*
+	 #define SEARCH_MOVES for both cases
+	 to find first code moves sequence
+	 Reversi::searchMoves(code11);
 
-//	Reversi::endCode=r.code();
+	 to find second code moves sequence
+	 Reversi::searchMoves(code11,code16);
+	 */
 
-	//without symmetry
-//	ReversiCode code14({0xaa1aaaaa26aaa02aull, 0xaaaaa12aaaaa62aaull, 0xaa4aaaaa92aaaa8eull, 0xaaaaaaaaaaaaaaaaull, 0xaaaaaaaaull});
-//	ReversiCode code17({0xaa0aaaaa22aaa028ull, 0xaaaaa029aaaa26aaull, 0xa80aaaaa82aaaa82ull, 0xaaaaaaaaaaaaaaaaull, 0xaaaaaaaaull});
-//	Reversi::layerSet[1].clear();
-//	Reversi::layerSet[1].insert(code14);
-//	Reversi::endCode=code17;
-//
+//	ReversiCode code16({0x8aaaa22aaa889aaaull, 0xaa8a82aaa202aaa8ull, 0xaa8aaaaa82aa2a82ull, 0xaaaaaaaaaaaaaaaaull, 0xaaaaaaaaull},white);
+//	ReversiCode code11({0x8aaaa62aaaaaaaaaull, 0xaaaa82aaa242aaa9ull, 0xaa8aaaaa82aaaa82ull, 0xaaaaaaaaaaaaaaaaull, 0xaaaaaaaaull},white);
+//	Reversi::searchMoves(code11);
+//	Reversi::searchMoves(code11,code16);
+
+
 //	r.test();
 //	return 0;
 
@@ -141,7 +135,7 @@ int main(){
 		psize = previousSet.size();
 		j = 0;
 		for (auto &code : previousSet) {
-			r.fromCode(code);
+			r=code;
 			r.addAllMoves(i, code);
 		}
 

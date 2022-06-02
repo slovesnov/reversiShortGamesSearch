@@ -10,3 +10,4 @@
 
 #include "ThreadData.h"
 
+int ThreadData::size;

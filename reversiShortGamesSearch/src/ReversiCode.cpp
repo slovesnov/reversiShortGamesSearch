@@ -85,7 +85,7 @@ std::string ReversiCode::toString()const{
 		s += format("%s0x%llxull",i?", ":"{", a);
 		i++;
 	}
-	s+="};";
+	s+="},";
 #ifdef REVERSI_CODE_MOVE_INSIDE
 	auto moveColor=getMove();
 #endif
@@ -124,6 +124,5 @@ int ReversiCode::turns()const{
 }
 
 std::ostream& operator<<(std::ostream& os, const ReversiCode& a){
-    os << a.toString();
-    return os;
+    return os << a.toString();
 }
