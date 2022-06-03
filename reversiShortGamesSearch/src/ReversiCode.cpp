@@ -60,7 +60,7 @@ bool ReversiCode::operator ==(const ReversiCode &o) const {
 bool ReversiCode::operator !=(const ReversiCode &o) const {
 	return !(*this == o);
 }
-/*
+
 void ReversiCode::operator =(const ReversiCode &o) {
 	int i=0;
 	for (auto &a : c) {
@@ -76,7 +76,7 @@ void ReversiCode::operator =(const ReversiCode &o) {
 	move=o.move;
 #endif
 	moveColor=o.moveColor;
-}*/
+}
 
 std::string ReversiCode::toString()const{
 	std::string s;
@@ -98,7 +98,7 @@ std::string ReversiCode::toString()const{
 	else{
 		s+=forma(int(moveColor));
 	}
-	return s;
+	return "ReversiCode ("+s+");";
 }
 
 #ifdef REVERSI_CODE_MOVE_INSIDE

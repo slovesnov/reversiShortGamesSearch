@@ -11,61 +11,70 @@ std::vector<ThreadData> threadData;
 
 void threadf(int t, int layer) {
 	auto &a = threadData[t];
-	a.start=clock();
-	double x,time;
+	a.start = clock();
+	double x, time;
 	Reversi r;
-	int i=0,j=0;
+	int i = 0;
 	Reversi p;
-	std::string s,q;
-	const int N=maxLayer<=15 ? 100'000 : 10'000;
-
-//	std::ifstream f("c:/slovesno/reversi/o"+std::to_string(a.index)+".txt");
-	std::ifstream f("o"+std::to_string(a.index)+".txt");
-	if(f.is_open()){
-		f>>j;
-	}
-	auto it = a.begin;
-	std::advance(it,j);
-	i+=j;
-
-	for (; it != a.end; it++) {
-		auto const &code = *it;
-		a.root=code;
-		r=code;
-		p.setPotentialMoves(r);
-		r.addAllMoves(code, maxLayer - maxLayer1, a, p);
-		time=timeElapse(a.start);
-		i++;
-		//i-j - time
-		//left size-i left=time*(size-i)/(i-j)
-
-		x = time * (ThreadData::size-i) / (i - j);
-		if (i % N == 0) {
-			s = format("%4.1lf%% %dk/%dk", i * 100. / ThreadData::size,i/1000,ThreadData::size/1000);
+	std::string s, q;
+	const int N = maxLayer <= 15 ? 100'000 : 50'000;
+	int size = ThreadData::size();
+	Chain c;
+	while ( (c = ThreadData::getNextChain(N)) ) {
+		for (auto it = c.begin; it != c.end; it++) {
+			auto const &code = *it;
+			a.root = code;
+			r = code;
+			p.setPotentialMoves(r);
+			r.addAllMoves(code, maxLayer - maxLayer1, a, p);
+		}
+		time = timeElapse(a.start);
+		i = c.proceed+N;
+		//i - time
+		//left size-i left=time*(size-i)/(i)
+		x = time * (size - i) / i;
+		if (i % N == 0 ) {
 			q = timeToString("%d%b%Y %H:%M:%S", true);
-			println("t%d %s %s left %s", t, s.c_str(), q.c_str(),
-					secondsToString(x).c_str());
-			fflush(stdout);
-			std::ofstream f("o" + std::to_string(t) + ".txt");
-			f << i << " " << ThreadData::size << " " << s << " " << q;
+			s = format("t%d %4.1lf%% %dk/%dk ",t, i * 100. / size, i / 1000,
+					size / 1000)+q+" left "+secondsToString(x);
+			if (t == 0) {
+				printl(s)
+				fflush(stdout);
+			}
+
+			std::ofstream f("o"+forma(t)+".txt");
+			f <<c.proceed<<"\n"<<s << "\n";
+			f.close();
+
 		}
 	}
-	q=timeToString("%d%b%Y %H:%M:%S",true);
-	println("t%d %s finished", t,q.c_str());
+	q = timeToString("%d%b%Y %H:%M:%S", true);
+	println("t%d %s finished", t, q.c_str());
 	fflush(stdout);
 }
 
-int main(){
-	const int threads = getNumberOfCores()-1;
+int main(int argc, char *argv[]){
 	const bool standard = 0;
 	const bool showNoBorder=false;
 	const int type = standard ? 1 : 3;
 	const int equalCharRepeat=60;
 	Reversi r;
 	std::string s,q;
-	int i, j, k, l;
+	int i, j, l;
 	size_t psize, ssize;
 	clock_t begin;
+	int threads;
+	if(argc==1){
+		threads = getNumberOfCores()-1;
+	}
+	else{
+		i=1;
+		if(!parseString(argv[i],j) || j<0 || j>=getNumberOfCores()){
+			printl("invalid argument",argv[i]);
+			return 0;
+		}
+		threads=j;
+	}
 
 	aslovSetOutputWidth(60);
 	Reversi::staticInit();
@@ -87,8 +96,18 @@ int main(){
 //	Reversi::searchMoves(code11);
 //	Reversi::searchMoves(code11,code16);
 
+	ReversiCode code12({0x9aaaaaa6aaaaa9aaull, 0xaaa98aaaa66aaaa8ull, 0xaa8aaa9a82aaa642ull, 0xaaaaaaaaaaaaaaaaull, 0xaaaaaaaaull},black);
+	ReversiCode code16({0x8aaaa2a2aaaaa8aaull, 0xaaa88aaaa22aaaa8ull, 0x6aa2aa9a82aaa600ull, 0xaaaaaaaaaaaaa8aaull, 0xaaaaaaaaull},white);
 
-//	r.test();
+//	r=code16;
+//	printl(r,r.turns())
+//
+//	r=code12;
+//	printl(r,r.turns())
+
+	//Reversi::searchMoves(code12);
+//	Reversi::searchMoves(code12,code16);
+
 //	return 0;
 
 	s=timeToString("%d%b%Y %H:%M:%S",true);
@@ -171,6 +190,9 @@ int main(){
 
 	}
 
+	if(maxLayer1>=maxLayer){
+		return 0;
+	}
 	int layer=i;
 	s=std::string(equalCharRepeat,'=');
 	printl(s);
@@ -179,26 +201,10 @@ int main(){
 	std::vector<std::thread> vt;
 
 	begin = clock();
-	auto& previousSet = Reversi::layerSet[i-1];
-	j=previousSet.size()/threads;
-	ThreadData::size=j;
-	ReversiCodeSetCI it;
-	l=0;
-	k=0;
-	it=previousSet.begin();
+	ThreadData::init(&Reversi::layerSet[i-1]);
 	threadData.resize(threads);
-	for(k=0;k<threads;k++){
-		auto&a=threadData[k];
-		a.begin=it;
-		a.index=k;
-		std::advance(it, j);
-	}
-	for(k=0;k<threads-1;k++){
-		threadData[k].end=threadData[k+1].begin;
-	}
-	threadData[k].end=previousSet.end();
-
 	for (i = 0; i < threads; ++i) {
+		threadData[i].index=i;
 		vt.push_back(std::thread(threadf, i,layer));
 	}
 

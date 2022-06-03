@@ -43,7 +43,7 @@ public:
 	bool operator<(ReversiCode const &o) const;
 	bool operator==(ReversiCode const &o) const;
 	bool operator!=(ReversiCode const &o) const;
-	//void operator=(ReversiCode const &o);
+	void operator=(ReversiCode const &o);
 	std::string toString()const;
 #ifdef REVERSI_CODE_MOVE_INSIDE
 	static const int d3 = (boardSize * (boardSize / 2 - 1) + boardSize / 2) * 2

@@ -17,8 +17,8 @@
 const int boardSize = 12;
 
 //cut all positions without board chips on this layer, if not defined never cut
-//#define BOARD_LAYER 11
-const int maxLayer1=11;
+//#define BOARD_LAYER 12
+const int maxLayer1=12;
 const int maxLayer=16;
 
 //original
@@ -38,11 +38,10 @@ const int maxLayer=16;
  * USE_SYMMETRY 2 layer 11  36,098,556 bf=6.50 2,199+0+7=2,206 1:06 main.cpp:65 main()
  */
 #ifndef SEARCH_MOVES
-#define USE_SYMMETRY 1
+	#define USE_SYMMETRY 1
 #endif
 
-#ifndef USE_SYMMETRY
-	//STORE_MOVE is valid only if USE_SYMMETRY isn't defined
+#ifdef SEARCH_MOVES
 	#define STORE_MOVE
 #endif
 
@@ -57,8 +56,6 @@ static const char empty = 2;
 //when REVERSI_CODE_MOVE_INSIDE is NOT defined programs faster 1-(6*60+10)/(6*60+55)=10.8%
 //REVERSI_CODE_MOVE_INSIDE is smaller sizeof(ReversiCode)
 //#define REVERSI_CODE_MOVE_INSIDE
-
-
 
 
 #endif /* DEFINES_H_ */

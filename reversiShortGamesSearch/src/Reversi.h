@@ -12,7 +12,6 @@
 #define REVERSI_H_
 
 #include <vector>
-#include <mutex>
 
 #include "ThreadData.h"
 
@@ -38,18 +37,15 @@ public:
 #ifdef STORE_MOVE
 	static std::vector<std::string> foundString[3];
 #endif
-#ifdef USE_SYMMETRY
 	static int flip[7][boardSize*boardSize];
-#endif
 
 	//unsigned char allow board size up to 16x16
 	unsigned char board[boardSize2];
 	char moveColor;
 #ifdef SEARCH_MOVES
-	static ReversiCode endCode;
+	static ReversiCodeSet endCode;
 	static bool searchFromStart;
 #endif
-	static std::mutex mtx;
 
 	Reversi();
 	Reversi(ReversiCode const& code);
@@ -91,17 +87,16 @@ public:
 	bool test(int p=0);
 	int countBorderChips()const;
 	void fillForFlip();
-#ifdef USE_SYMMETRY
 	void setFlip(int n);
-#endif
 	int getMinChips()const;
 	int turns()const;
 	void setPotentialMoves(Reversi const& r);
 	void addPotentialMove(int i);
-	static void outSaveFoundedToFile(const ReversiCode& code,ThreadData const&data,int line);
+	static void outSaveFoundedToFile(const ReversiCode& code,ThreadData const&data,int line,int lastmove);
 #ifdef SEARCH_MOVES
 	static void searchMoves(ReversiCode const& code);
 	static void searchMoves(ReversiCode const& from,ReversiCode const& to);
+	void addSearchAllSymmetries(ReversiCode const& code);
 #endif
 };
 

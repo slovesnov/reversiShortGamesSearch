@@ -29,15 +29,12 @@ int Reversi::borderCount;
 std::vector<std::string> Reversi::foundString[3];
 #endif
 
-#ifdef USE_SYMMETRY
 int Reversi::flip[7][boardSize*boardSize];
-#endif
 
 #ifdef SEARCH_MOVES
-ReversiCode Reversi::endCode;
+ReversiCodeSet Reversi::endCode;
 bool Reversi::searchFromStart;
 #endif
-std::mutex Reversi::mtx;
 
 const int Reversi::direction[] = { -lineSize-1, -lineSize, -lineSize+1, -1, 1, lineSize-1, lineSize, lineSize+1 };
 const char outChar[]="bw.";
@@ -60,7 +57,7 @@ void Reversi::staticInit() {
 			}
 		}
 	}
-#ifdef USE_SYMMETRY
+#if defined(USE_SYMMETRY) || defined(SEARCH_MOVES)
 	Reversi r;
 	k=0;
 	for (j = 0; j < 2; j++) {
@@ -299,7 +296,10 @@ void Reversi::addAllMoves(int layer, ReversiCode const &parentCode) const {
 #ifdef BORDER_COUNT
 	int j;
 #endif
-	int k, l;
+	int l;
+#ifndef SEARCH_MOVES
+	int k;
+#endif
 	bool f = false;
 	Reversi t;
 	ReversiCode tcode;
@@ -327,7 +327,7 @@ void Reversi::addAllMoves(int layer, ReversiCode const &parentCode) const {
 #endif
 
 #ifdef SEARCH_MOVES
-				if(tcode==endCode){
+				if(endCode.find(tcode)!=endCode.end()){
 					s="";
 					tcode=parentCode;
 					//auto a = this->code();
@@ -347,7 +347,7 @@ void Reversi::addAllMoves(int layer, ReversiCode const &parentCode) const {
 					printl(s);
 					exit(0);
 				}
-#endif
+#else//SEARCH_MOVES326
 
 				if (t.isEnd()) {
 					k = t.endGameType();
@@ -388,9 +388,17 @@ void Reversi::addAllMoves(int layer, ReversiCode const &parentCode) const {
 						s="lastmove "+indexToString(i);
 #endif
 						println("found %s %d turns %s", gameTypeString[k], layer,s.c_str());
+
+						//Reversi r=parentCode;
+//						t.print();
+
 						fflush(stdout);
 					}
-				} else if(layer!=maxLayer){
+				}
+
+#endif//SEARCH_MOVES326
+
+				else if(layer!=maxLayer){
 #ifdef BOARD_LAYER
 					if(layer!=BOARD_LAYER || t.countBorderChips()>0){
 						insert(layer, parentCode, i, tcode);
@@ -435,8 +443,8 @@ void Reversi::addAllMoves(ReversiCode const &parentCode, int depth,
 						if((searchBWOnly && k==BLACK_AND_WHITE) || !searchBWOnly){
 							b=data.foundEndCount[layer][k].insert(tcode).second;
 						}
-						if (boardSize >= 12 && k == BLACK_AND_WHITE && b) {
-							outSaveFoundedToFile(tcode,data,__LINE__);
+						if (/*boardSize >= 12 &&*/ k == BLACK_AND_WHITE && b) {
+							outSaveFoundedToFile(tcode,data,__LINE__,i);
 						}
 					}
 				}
@@ -460,8 +468,8 @@ void Reversi::addAllMoves(ReversiCode const &parentCode, int depth,
 		if ((searchBWOnly && k == BLACK_AND_WHITE) || !searchBWOnly) {
 			b=data.foundEndCount[layer - 1][k].insert(parentCode).second;
 		}
-		if (boardSize >= 12 && k == BLACK_AND_WHITE && b) {
-			outSaveFoundedToFile(tcode,data,__LINE__);
+		if (/*boardSize >= 12 &&*/ k == BLACK_AND_WHITE && b) {
+			outSaveFoundedToFile(tcode,data,__LINE__,-1);
 		}
 	}
 }
@@ -777,12 +785,12 @@ int Reversi::countBorderChips() const{
 void Reversi::fillForFlip() {
 	int i,j;
 	//#if USE_SYMMETRY!=1 when USE_SYMMETRY not defined or USE_SYMMETRY==2
-#if USE_SYMMETRY!=1
+#if USE_SYMMETRY!=1 && !defined(SEARCH_MOVES)
 	int k=0;
 #endif
 	for (i = 1; i <= boardSize; i++) {
 		for (j = 1; j <= boardSize; j++) {
-#if USE_SYMMETRY==1
+#if USE_SYMMETRY==1 || defined(SEARCH_MOVES)
 			board[i * lineSize + j]=i * lineSize + j;
 #else
 			board[i * lineSize + j]=k++;
@@ -791,7 +799,6 @@ void Reversi::fillForFlip() {
 	}
 }
 
-#ifdef USE_SYMMETRY
 void Reversi::setFlip(int n){
 	int i,j,k=0;
 	for (i = 1; i <= boardSize; i++) {
@@ -800,7 +807,6 @@ void Reversi::setFlip(int n){
 		}
 	}
 }
-#endif
 
 int Reversi::getMinChips() const {
 	int i,j;
@@ -857,7 +863,7 @@ std::ostream& operator<<(std::ostream& os, const Reversi& a){
 }
 
 void Reversi::outSaveFoundedToFile(const ReversiCode& code,
-		const ThreadData &data,int line) {
+		const ThreadData &data,int line,int lastmove) {
 
 	Reversi r;
 
@@ -884,19 +890,19 @@ void Reversi::outSaveFoundedToFile(const ReversiCode& code,
 	}
 
 	i=0;
-	mtx.lock();
-	std::ofstream f("found.txt",o);
-	f<<"at line"<<line<<"\n";
-	for(auto&c:v){
+	ThreadData::mtx.lock();
+	std::ofstream f("found.txt", o);
+	f << "at line" << line <<" lastmove "<<lastmove<<" "<< indexToString(lastmove) << "\n";
+	for (auto &c : v) {
 		Reversi r = c;
-		if(i){
-			f<<"parent\n";
+		if (i) {
+			f << "parent\n";
 		}
-		f << r << " turns" << r.turns() << "\ncode" << c<<"\n";
+		f << r << " turns" << r.turns() << "\n" << c << "\n";
 		i++;
 	}
 	f.close();
-	mtx.unlock();
+	ThreadData::mtx.unlock();
 
 	if(!findAll){
 		exit(0);
@@ -906,14 +912,31 @@ void Reversi::outSaveFoundedToFile(const ReversiCode& code,
 #ifdef SEARCH_MOVES
 void Reversi::searchMoves(ReversiCode const& code){
 	searchFromStart = true;
-	endCode = code;
+	Reversi r=code;
+	r.addSearchAllSymmetries(code);
 }
 
 void Reversi::searchMoves(ReversiCode const& from,ReversiCode const& to){
 	searchFromStart = false;
 	layerSet[1].clear();
 	layerSet[1].insert(from);
-	endCode = to;
+	Reversi r=to;
+	r.addSearchAllSymmetries(to);
+}
+
+void Reversi::addSearchAllSymmetries(ReversiCode const& code){
+	Reversi r=code;
+	endCode.insert(code);
+	r.moveColor = moveColor;
+	int i, j, i1, j1;
+	for (i = 0; i < 7; i++) {
+		j = 0;
+		for (i1 = 1; i1 <= boardSize; i1++) {
+			for (j1 = 1; j1 <= boardSize; j1++) {
+				r.board[i1 * lineSize + j1] = board[flip[i][j++]];
+			}
+		}
+		endCode.insert(r.code1());
+	}
 }
 #endif
-
