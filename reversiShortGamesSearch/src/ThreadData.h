@@ -28,6 +28,7 @@ public:
 class ThreadData{
 	static int proceed;
 public:
+	static int start_it;
 	int index;
 	ReversiCodeSet foundEndCount[maxLayer-maxLayer1+1][3];
 	ReversiCode root;
@@ -36,7 +37,7 @@ public:
 	static ReversiCodeSet* pset;
 	static ReversiCodeSetCI first;
 	static Chain getNextChain(int n);
-	static void init(ReversiCodeSet*p);
+	static void init(ReversiCodeSet*p,int start);
 	static size_t size(){
 		return pset->size();
 	}

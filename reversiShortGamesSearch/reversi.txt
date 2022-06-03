@@ -714,3 +714,7 @@ non standard board=12x12 symmetry=1 searchBWOnly=1 storeMove=0 BOARD_LAYER=11 ma
 11     100,677 bf=0.02 1:12                                  main.cpp:161 main()
 12     689,643 bf=6.85 0:01                                  main.cpp:161 main()
 13   5,284,186 bf=7.66 0:09                                  main.cpp:161 main()
+
+100k/hour=0.1m/hour for 1 core
+38m/5 cores=7.6m
+76 - hours

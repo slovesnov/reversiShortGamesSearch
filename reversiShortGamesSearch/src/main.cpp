@@ -9,12 +9,16 @@
 
 std::vector<ThreadData> threadData;
 
+std::string getOutFileName(int i){
+	return "o"+forma(i)+".txt";
+}
+
 void threadf(int t, int layer) {
 	auto &a = threadData[t];
 	a.start = clock();
 	double x, time;
 	Reversi r;
-	int i = 0;
+	int i = 0,j;
 	Reversi p;
 	std::string s, q;
 	const int N = maxLayer <= 15 ? 100'000 : 50'000;
@@ -30,23 +34,21 @@ void threadf(int t, int layer) {
 		}
 		time = timeElapse(a.start);
 		i = c.proceed+N;
-		//i - time
-		//left size-i left=time*(size-i)/(i)
-		x = time * (size - i) / i;
-		if (i % N == 0 ) {
-			q = timeToString("%d%b%Y %H:%M:%S", true);
-			s = format("t%d %4.1lf%% %dk/%dk ",t, i * 100. / size, i / 1000,
-					size / 1000)+q+" left "+secondsToString(x);
-			if (t == 0) {
-				printl(s)
-				fflush(stdout);
-			}
-
-			std::ofstream f("o"+forma(t)+".txt");
-			f <<c.proceed<<"\n"<<s << "\n";
-			f.close();
-
+		j=i-ThreadData::start_it;
+		//j - time
+		//left size-j left=time*(size-j)/j
+		x = time * (size - j) / j;
+		q = timeToString("%d%b%Y %H:%M:%S", true);
+		s = format("t%d %4.1lf%% %dk/%dk ",t, i * 100. / size, i / 1000,
+				size / 1000)+q+" left "+secondsToString(x);
+		if (t == 0) {
+			printl(s)
+			fflush(stdout);
 		}
+
+		std::ofstream f(getOutFileName(t));
+		f <<c.proceed<<"\n"<<s << "\n";
+		f.close();
 	}
 	q = timeToString("%d%b%Y %H:%M:%S", true);
 	println("t%d %s finished", t, q.c_str());
@@ -81,7 +83,18 @@ int main(int argc, char *argv[]){
 	Reversi::initFirst2Layers(type);
 	preventThreadSleep();
 
-
+	l=0;
+	for(i=0;i<threads;i++){
+		std::ifstream f(getOutFileName(i));
+		if(f.is_open()){
+			f>>j;
+			if(j<l || i==0){
+				l=j;
+			}
+		}
+	}
+	const int start_it=l;
+	printl(start_it);
 	/*
 	 #define SEARCH_MOVES for both cases
 	 to find first code moves sequence
@@ -96,9 +109,9 @@ int main(int argc, char *argv[]){
 //	Reversi::searchMoves(code11);
 //	Reversi::searchMoves(code11,code16);
 
-	ReversiCode code12({0x9aaaaaa6aaaaa9aaull, 0xaaa98aaaa66aaaa8ull, 0xaa8aaa9a82aaa642ull, 0xaaaaaaaaaaaaaaaaull, 0xaaaaaaaaull},black);
-	ReversiCode code16({0x8aaaa2a2aaaaa8aaull, 0xaaa88aaaa22aaaa8ull, 0x6aa2aa9a82aaa600ull, 0xaaaaaaaaaaaaa8aaull, 0xaaaaaaaaull},white);
-
+//	ReversiCode code12({0x9aaaaaa6aaaaa9aaull, 0xaaa98aaaa66aaaa8ull, 0xaa8aaa9a82aaa642ull, 0xaaaaaaaaaaaaaaaaull, 0xaaaaaaaaull},black);
+//	ReversiCode code16({0x8aaaa2a2aaaaa8aaull, 0xaaa88aaaa22aaaa8ull, 0x6aa2aa9a82aaa600ull, 0xaaaaaaaaaaaaa8aaull, 0xaaaaaaaaull},white);
+//
 //	r=code16;
 //	printl(r,r.turns())
 //
@@ -201,7 +214,7 @@ int main(int argc, char *argv[]){
 	std::vector<std::thread> vt;
 
 	begin = clock();
-	ThreadData::init(&Reversi::layerSet[i-1]);
+	ThreadData::init(&Reversi::layerSet[i-1],start_it);
 	threadData.resize(threads);
 	for (i = 0; i < threads; ++i) {
 		threadData[i].index=i;

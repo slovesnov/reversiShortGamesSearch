@@ -13,6 +13,7 @@
 std::mutex ThreadData::mtx;
 ReversiCodeSet* ThreadData::pset;
 ReversiCodeSetCI ThreadData::first;
+int ThreadData::start_it;
 int ThreadData::proceed;
 
 Chain ThreadData::getNextChain(int n) {
@@ -39,7 +40,9 @@ Chain ThreadData::getNextChain(int n) {
 	return c;
 }
 
-void ThreadData::init(ReversiCodeSet *p) {
+void ThreadData::init(ReversiCodeSet *p,int start) {
 	pset=p;
 	first=p->begin();
+	start_it=start;
+	std::advance(first, start);
 }
