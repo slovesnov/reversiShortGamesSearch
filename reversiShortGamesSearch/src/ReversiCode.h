@@ -40,6 +40,12 @@ public:
 #endif
 			);
 
+	ReversiCode(VUint64 v
+#ifndef REVERSI_CODE_MOVE_INSIDE
+			,char move
+#endif
+			);
+
 	bool operator<(ReversiCode const &o) const;
 	bool operator==(ReversiCode const &o) const;
 	bool operator!=(ReversiCode const &o) const;

@@ -44,5 +44,6 @@ void ThreadData::init(ReversiCodeSet *p,int start) {
 	pset=p;
 	first=p->begin();
 	start_it=start;
+	proceed+=start;
 	std::advance(first, start);
 }

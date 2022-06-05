@@ -11,22 +11,23 @@
 #ifndef DEFINES_H_
 #define DEFINES_H_
 
+#include <vector>
 /* allow even boardSize up to 16 if boardSize more than 16 need to change
  * type of boardSize from unsigned char to short because of fillForFlip() function
  */
-const int boardSize = 12;
+const int boardSize = 8;
 
 //cut all positions without board chips on this layer, if not defined never cut
-#define BOARD_LAYER 12
-const int maxLayer1=12;
-const int maxLayer=12;
+//#define BOARD_LAYER 12
+const int maxLayer1=11;
+const int maxLayer=15;
 
 //original
 //const int maxLayer1=11;
 //const int maxLayer=16;
 
 //for searching moves
-#define SEARCH_MOVES
+//#define SEARCH_MOVES
 
 /* ifdef USE_SYMMETRY much slower but needs less memory, also "move string" will be invalid
  * 1 or 2 or not defined if symmetry not used
@@ -47,7 +48,6 @@ const int maxLayer=12;
 
 const bool searchBWOnly=1;
 
-
 //#define BORDER_COUNT
 static const char black = 0;
 static const char white = 1;
@@ -57,5 +57,6 @@ static const char empty = 2;
 //REVERSI_CODE_MOVE_INSIDE is smaller sizeof(ReversiCode)
 //#define REVERSI_CODE_MOVE_INSIDE
 
+using VUint64 = std::vector<uint64_t>;
 
 #endif /* DEFINES_H_ */

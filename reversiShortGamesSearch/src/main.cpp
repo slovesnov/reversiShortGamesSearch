@@ -12,6 +12,7 @@ std::vector<ThreadData> threadData;
 std::string getOutFileName(int i){
 	return "o"+forma(i)+".txt";
 }
+ReversiCodeSet proceedFile();
 
 void threadf(int t, int layer) {
 	auto &a = threadData[t];
@@ -21,7 +22,7 @@ void threadf(int t, int layer) {
 	int i = 0,j;
 	Reversi p;
 	std::string s, q;
-	const int N = maxLayer <= 15 ? 100'000 : 50'000;
+	const int N = maxLayer <= 15 ? 100'000 : 20'000;
 	int size = ThreadData::size();
 	Chain c;
 	while ( (c = ThreadData::getNextChain(N)) ) {
@@ -35,6 +36,7 @@ void threadf(int t, int layer) {
 		time = timeElapse(a.start);
 		i = c.proceed+N;
 		j=i-ThreadData::start_it;
+		//printl(i,j)
 		//j - time
 		//left size-j left=time*(size-j)/j
 		x = time * (size - j) / j;
@@ -66,16 +68,20 @@ int main(int argc, char *argv[]){
 	size_t psize, ssize;
 	clock_t begin;
 	int threads;
+	bool useStartIt=1;
 	if(argc==1){
 		threads = getNumberOfCores()-1;
 	}
 	else{
 		i=1;
-		if(!parseString(argv[i],j) || j<0 || j>=getNumberOfCores()){
+		if(!parseString(argv[i],j) || j<0 || j>getNumberOfCores()){
 			printl("invalid argument",argv[i]);
 			return 0;
 		}
 		threads=j;
+		if(argc>2){
+			useStartIt=0;
+		}
 	}
 
 	aslovSetOutputWidth(60);
@@ -84,17 +90,18 @@ int main(int argc, char *argv[]){
 	preventThreadSleep();
 
 	l=0;
-	for(i=0;i<threads;i++){
-		std::ifstream f(getOutFileName(i));
-		if(f.is_open()){
-			f>>j;
-			if(j<l || i==0){
-				l=j;
+	if(useStartIt){
+		for(i=0;i<threads;i++){
+			std::ifstream f(getOutFileName(i));
+			if(f.is_open()){
+				f>>j;
+				if(j<l || i==0){
+					l=j;
+				}
 			}
 		}
 	}
 	const int start_it=l;
-	printl(start_it);
 	/*
 	 #define SEARCH_MOVES for both cases
 	 to find first code moves sequence
@@ -121,7 +128,20 @@ int main(int argc, char *argv[]){
 	//Reversi::searchMoves(code12);
 //	Reversi::searchMoves(code12,code16);
 
-//	return 0;
+
+/*
+	ReversiCodeSet set=proceedFile();
+	printl(set.size())
+	for(auto a:set){
+		r=a;
+		if(r.code()!=a){
+			printei
+		}
+		r.print();
+	}
+	return 0;
+*/
+
 
 	s=timeToString("%d%b%Y %H:%M:%S",true);
 
@@ -131,6 +151,8 @@ int main(int argc, char *argv[]){
 #else
 	s+="0";
 #endif
+
+	s+=" start="+toString(start_it,',');
 	printl(s);
 
 	s=type<2?"standard":"non standard";
@@ -260,6 +282,48 @@ int main(int argc, char *argv[]){
 	//getchar();//if run not under eclipse
 
 	//printl(	Reversi::shortestEndGameCounts())
+}
+
+ReversiCodeSet proceedFile(){
+	std::ifstream f("found.txt");
+	std::string s,ps,q;
+	size_t p,p1;
+	uint64_t u=0;
+	VUint64 v;
+	ReversiCodeSet set;
+	while(std::getline(f, s)){
+		if(startsWith(ps, " turns16")){
+			p=s.find('{');
+			p1=s.find('}');
+//			printl(s)
+			q=s.substr(p+1, p1-p-1);
+//			printl(q,'!')
+			v.clear();
+			for(auto&a:split(q,", ")){
+				q=a.substr(2, a.length()-5);
+//				printl("!",q,"!")
+				if(parseString(q,u,16)){
+					v.push_back(u);
+				}
+				else{
+					printei
+					//throw 0;
+				}
+			}
+			set.insert(ReversiCode(v
+					//since game over color can be any
+#ifndef REVERSI_CODE_MOVE_INSIDE
+			,black
+#endif
+					));
+//			printl(joinV(v,'#'))
+		}
+		ps=s;
+	}
+	return set;
+//	printl(joinV(threadOrder))
+
+
 }
 
 /* file parser for html

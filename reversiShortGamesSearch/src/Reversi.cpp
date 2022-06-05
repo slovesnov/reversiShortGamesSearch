@@ -350,6 +350,12 @@ void Reversi::addAllMoves(int layer, ReversiCode const &parentCode) const {
 #else//SEARCH_MOVES326
 
 				if (t.isEnd()) {
+					//use same color for operator< because game is over
+#ifdef	REVERSI_CODE_MOVE_INSIDE
+					tcode.setBlackMove();
+#else
+					tcode.moveColor=black;
+#endif
 					k = t.endGameType();
 					if( (searchBWOnly && k == BLACK_AND_WHITE) || !searchBWOnly ){
 						foundEndCount[layer][k].insert(tcode);
@@ -387,7 +393,7 @@ void Reversi::addAllMoves(int layer, ReversiCode const &parentCode) const {
 #else
 						s="lastmove "+indexToString(i);
 #endif
-						println("found %s %d turns %s", gameTypeString[k], layer,s.c_str());
+//						println("found %s %d turns %s", gameTypeString[k], layer,s.c_str());
 
 						//Reversi r=parentCode;
 //						t.print();
@@ -438,6 +444,12 @@ void Reversi::addAllMoves(ReversiCode const &parentCode, int depth,
 				if (depth == 1) {
 					if (t.isEnd()) {
 						tcode=t.code();
+						//use same color for operator< because game is over
+#ifdef	REVERSI_CODE_MOVE_INSIDE
+						tcode.setBlackMove();
+#else
+						tcode.moveColor = black;
+#endif
 						k = t.endGameType();
 						bool b=true;
 						if((searchBWOnly && k==BLACK_AND_WHITE) || !searchBWOnly){
@@ -463,10 +475,17 @@ void Reversi::addAllMoves(ReversiCode const &parentCode, int depth,
 	}
 
 	if(layer>0){
+		tcode=parentCode;
+		//use same color for operator< because game is over
+#ifdef	REVERSI_CODE_MOVE_INSIDE
+		tcode.setBlackMove();
+#else
+		tcode.moveColor=black;
+#endif
 		k = endGameType();
 		bool b=true;
 		if ((searchBWOnly && k == BLACK_AND_WHITE) || !searchBWOnly) {
-			b=data.foundEndCount[layer - 1][k].insert(parentCode).second;
+			b=data.foundEndCount[layer - 1][k].insert(tcode).second;
 		}
 		if (/*boardSize >= 12 &&*/ k == BLACK_AND_WHITE && b) {
 			outSaveFoundedToFile(tcode,data,__LINE__,-1);
@@ -864,7 +883,6 @@ std::ostream& operator<<(std::ostream& os, const Reversi& a){
 
 void Reversi::outSaveFoundedToFile(const ReversiCode& code,
 		const ThreadData &data,int line,int lastmove) {
-
 	Reversi r;
 
 	ReversiCode v[]={code,data.root};

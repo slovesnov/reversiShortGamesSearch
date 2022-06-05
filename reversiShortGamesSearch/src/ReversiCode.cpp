@@ -24,8 +24,22 @@ ReversiCode::ReversiCode(std::initializer_list<uint64_t> array
 #ifndef REVERSI_CODE_MOVE_INSIDE
 	moveColor=move;
 #endif
-
 }
+
+ReversiCode::ReversiCode(VUint64 array
+#ifndef REVERSI_CODE_MOVE_INSIDE
+			,char move
+#endif
+		){
+	auto p=c;
+	for(auto&a:array){
+		*p++=a;
+	}
+#ifndef REVERSI_CODE_MOVE_INSIDE
+	moveColor=move;
+#endif
+}
+
 
 bool ReversiCode::operator<(ReversiCode const &o) const {
 	auto p=o.c;
@@ -75,7 +89,9 @@ void ReversiCode::operator =(const ReversiCode &o) {
 	parentColor=o.parentColor;
 	move=o.move;
 #endif
+#ifndef	REVERSI_CODE_MOVE_INSIDE
 	moveColor=o.moveColor;
+#endif
 }
 
 std::string ReversiCode::toString()const{
