@@ -801,6 +801,41 @@ int Reversi::countBorderChips() const{
 	return k;
 }
 
+int Reversi::countBorderChips(char color) const{
+	int i,k=0;
+	for (i = 1; i <= boardSize; i++) {
+		if(board[1 * lineSize + i] ==color){
+			k++;
+		}
+		if(board[boardSize * lineSize + i] ==color){
+			k++;
+		}
+	}
+	for (i = 2; i < boardSize; i++) {
+		if(board[i * lineSize + 1] ==color){
+			k++;
+		}
+		if(board[i * lineSize + boardSize] ==color){
+			k++;
+		}
+	}
+	return k;
+}
+
+int Reversi::countChips(char color) const {
+	int i,j;
+	int c=0;
+	for (i = 1; i <= boardSize; i++) {
+		for (j = 1; j <= boardSize; j++) {
+			if(board[i * lineSize + j]==color){
+				c++;
+			}
+		}
+	}
+	return c;
+}
+
+
 void Reversi::fillForFlip() {
 	int i,j;
 	//#if USE_SYMMETRY!=1 when USE_SYMMETRY not defined or USE_SYMMETRY==2

@@ -86,6 +86,8 @@ public:
 	static std::string shortestEndGameCounts();
 	bool test(int p=0);
 	int countBorderChips()const;
+	int countBorderChips(char color)const;
+	int countChips(char color)const;
 	void fillForFlip();
 	void setFlip(int n);
 	int getMinChips()const;

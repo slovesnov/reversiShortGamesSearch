@@ -128,6 +128,7 @@ int main(int argc, char *argv[]){
 	//Reversi::searchMoves(code12);
 //	Reversi::searchMoves(code12,code16);
 
+
 /*
 	ReversiCodeSet set=proceedFile();
 	printl(set.size())
@@ -139,10 +140,12 @@ int main(int argc, char *argv[]){
 		if(r.turns()!=16){
 			printel(r.turns())
 		}
+		printl(r.countBorderChips(),r.countBorderChips(black),'/',r.countChips(black),r.countBorderChips(white),'/',r.countChips(white))
 		r.print();
 	}
 	return 0;
 */
+
 
 	s=timeToString("%d%b%Y %H:%M:%S",true);
 
@@ -285,6 +288,7 @@ int main(int argc, char *argv[]){
 ReversiCodeSet proceedFile(){
 	std::ifstream f("found.txt");
 	std::string s,ps,q;
+	//std::string color;
 	size_t p,p1;
 	uint64_t u=0;
 	VUint64 v;
@@ -294,7 +298,10 @@ ReversiCodeSet proceedFile(){
 		if(startsWith(ps, " turns16")){
 			p=s.find('{');
 			p1=s.find('}');
-//			printl(s)
+//			color=s.substr(p1+2,5);
+			//			if(color!="black" && color!="white"){
+			//				throw 0;
+			//			}
 			q=s.substr(p+1, p1-p-1);
 //			printl(q,'!')
 			v.clear();
