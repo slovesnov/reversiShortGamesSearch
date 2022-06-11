@@ -1,0 +1,68 @@
+at line439
+  abcdefghijkl 
+ 1......w.b.b.1
+ 2.......b.b..2
+ 3......b.b...3
+ 4.....bbb.b..4
+ 5.....bb...b.5
+ 6.....bb....b6
+ 7.....bb.....7
+ 8......b.....8
+ 9............9
+10............10
+11............11
+12............12
+  abcdefghijkl 
+ turns16
+code{0x8aaaa22aaa889aaaull, 0xaa8a82aaa202aaa8ull, 0xaa8aaaaa82aa2a82ull, 0xaaaaaaaaaaaaaaaaull, 0xaaaaaaaaull};white
+parent
+  abcdefghijkl 
+ 1............1
+ 2.......b.w..2
+ 3......b.w...3
+ 4.....bbw.b..4
+ 5.....bb.....5
+ 6.....bb.....6
+ 7.....bb.....7
+ 8......b.....8
+ 9............9
+10............10
+11............11
+12............12
+  abcdefghijkl 
+ turns11
+code{0x8aaaa62aaaaaaaaaull, 0xaaaa82aaa242aaa9ull, 0xaa8aaaaa82aaaa82ull, 0xaaaaaaaaaaaaaaaaull, 0xaaaaaaaaull};white
+at line439
+  abcdefghijkl 
+ 1......w.b.b.1
+ 2.......b.b..2
+ 3......b.b...3
+ 4.....bbb.b..4
+ 5......b...b.5
+ 6....bbb....b6
+ 7.....bb.....7
+ 8......b.....8
+ 9............9
+10............10
+11............11
+12............12
+  abcdefghijkl 
+ turns16
+code{0x8aaaa22aaa889aaaull, 0xaa8a8aaaa202aaa8ull, 0xaa8aaaaa82aa2a80ull, 0xaaaaaaaaaaaaaaaaull, 0xaaaaaaaaull};white
+parent
+  abcdefghijkl 
+ 1............1
+ 2.......b.w..2
+ 3......b.w...3
+ 4.....bbw.b..4
+ 5......b.....5
+ 6....bbb.....6
+ 7.....bb.....7
+ 8......b.....8
+ 9............9
+10............10
+11............11
+12............12
+  abcdefghijkl 
+ turns11
+code{0x8aaaa62aaaaaaaaaull, 0xaaaa8aaaa242aaa9ull, 0xaa8aaaaa82aaaa80ull, 0xaaaaaaaaaaaaaaaaull, 0xaaaaaaaaull};white

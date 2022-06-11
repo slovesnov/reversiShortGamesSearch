@@ -15,7 +15,7 @@
 /* allow even boardSize up to 16 if boardSize more than 16 need to change
  * type of boardSize from unsigned char to short because of fillForFlip() function
  */
-const int boardSize = 8;
+const int boardSize = 12;
 
 //cut all positions without board chips on this layer, if not defined never cut
 //#define BOARD_LAYER 12

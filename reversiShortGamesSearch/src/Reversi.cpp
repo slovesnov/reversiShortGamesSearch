@@ -884,7 +884,6 @@ std::ostream& operator<<(std::ostream& os, const Reversi& a){
 void Reversi::outSaveFoundedToFile(const ReversiCode& code,
 		const ThreadData &data,int line,int lastmove) {
 	Reversi r;
-
 	ReversiCode v[]={code,data.root};
 	int i=0;
 	for(auto&c:v){

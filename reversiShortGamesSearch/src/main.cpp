@@ -58,7 +58,7 @@ void threadf(int t, int layer) {
 }
 
 int main(int argc, char *argv[]){
-	const bool standard = 0;
+	const bool standard = 1;
 	const bool showNoBorder=false;
 	const int type = standard ? 1 : 3;
 	const int equalCharRepeat=60;
@@ -128,7 +128,6 @@ int main(int argc, char *argv[]){
 	//Reversi::searchMoves(code12);
 //	Reversi::searchMoves(code12,code16);
 
-
 /*
 	ReversiCodeSet set=proceedFile();
 	printl(set.size())
@@ -137,11 +136,13 @@ int main(int argc, char *argv[]){
 		if(r.code()!=a){
 			printei
 		}
+		if(r.turns()!=16){
+			printel(r.turns())
+		}
 		r.print();
 	}
 	return 0;
 */
-
 
 	s=timeToString("%d%b%Y %H:%M:%S",true);
 
@@ -279,9 +280,6 @@ int main(int argc, char *argv[]){
 	printl(s)
 	;
 	fflush(stdout);
-	//getchar();//if run not under eclipse
-
-	//printl(	Reversi::shortestEndGameCounts())
 }
 
 ReversiCodeSet proceedFile(){
@@ -291,6 +289,7 @@ ReversiCodeSet proceedFile(){
 	uint64_t u=0;
 	VUint64 v;
 	ReversiCodeSet set;
+
 	while(std::getline(f, s)){
 		if(startsWith(ps, " turns16")){
 			p=s.find('{');
@@ -299,15 +298,16 @@ ReversiCodeSet proceedFile(){
 			q=s.substr(p+1, p1-p-1);
 //			printl(q,'!')
 			v.clear();
-			for(auto&a:split(q,", ")){
+			VString vs=split(q,", ");
+			for(auto&a:vs){
 				q=a.substr(2, a.length()-5);
-//				printl("!",q,"!")
 				if(parseString(q,u,16)){
+//					printl("%llx",u)
 					v.push_back(u);
 				}
 				else{
 					printei
-					//throw 0;
+					throw 0;
 				}
 			}
 			set.insert(ReversiCode(v
@@ -316,13 +316,11 @@ ReversiCodeSet proceedFile(){
 			,black
 #endif
 					));
-//			printl(joinV(v,'#'))
 		}
 		ps=s;
 	}
 	return set;
 //	printl(joinV(threadOrder))
-
 
 }
 

@@ -17,6 +17,10 @@ ReversiCode::ReversiCode(std::initializer_list<uint64_t> array
 			,char move
 #endif
 		){
+	if(array.size()!=size){
+		printeln("invalid size")
+		return;
+	}
 	auto p=c;
 	for(auto&a:array){
 		*p++=a;
@@ -26,11 +30,15 @@ ReversiCode::ReversiCode(std::initializer_list<uint64_t> array
 #endif
 }
 
-ReversiCode::ReversiCode(VUint64 array
+ReversiCode::ReversiCode(VUint64 const& array
 #ifndef REVERSI_CODE_MOVE_INSIDE
 			,char move
 #endif
 		){
+	if(array.size()!=size){
+		printeln("invalid size")
+		return;
+	}
 	auto p=c;
 	for(auto&a:array){
 		*p++=a;

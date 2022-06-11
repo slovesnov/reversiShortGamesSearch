@@ -40,7 +40,7 @@ public:
 #endif
 			);
 
-	ReversiCode(VUint64 v
+	ReversiCode(VUint64 const& v
 #ifndef REVERSI_CODE_MOVE_INSIDE
 			,char move
 #endif
