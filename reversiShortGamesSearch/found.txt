@@ -1,0 +1,442 @@
+at line447 lastmove 79 a6
+  abcdefghijkl 
+ 1.b...w......1
+ 2..b.w.......2
+ 3.b.b...b....3
+ 4..b.b.b.....4
+ 5.b.b.b......5
+ 6b...bbb.....6
+ 7.....bb.....7
+ 8.....b......8
+ 9............9
+10............10
+11............11
+12............12
+  abcdefghijkl 
+ turns16
+ReversiCode ({0x2a22aaa98aaaa6a2ull, 0xa8aaa222aa888aaaull, 0xaaa2aaaa82aaaa80ull, 0xaaaaaaaaaaaaaaaaull, 0xaaaaaaaaull},white);
+parent
+  abcdefghijkl 
+ 1............1
+ 2..w.b.......2
+ 3...w...b....3
+ 4..b.w.b.....4
+ 5...b.b......5
+ 6....bbb.....6
+ 7.....bb.....7
+ 8.....b......8
+ 9............9
+10............10
+11............11
+12............12
+  abcdefghijkl 
+ turns11
+ReversiCode ({0x2a6aaaa89aaaaaaaull, 0xaaaaa22aaa898aaaull, 0xaaa2aaaa82aaaa80ull, 0xaaaaaaaaaaaaaaaaull, 0xaaaaaaaaull},white);
+at line447 lastmove 22 i1
+  abcdefghijkl 
+ 1........w...1
+ 2........ww.w2
+ 3.......wwww.3
+ 4.......www.b4
+ 5.......ww...5
+ 6.....www....6
+ 7.....ww.....7
+ 8.....w......8
+ 9............9
+10............10
+11............11
+12............12
+  abcdefghijkl 
+ turns16
+ReversiCode ({0x6aaa65aaaaa9aaaaull, 0xaaa96aaa256aaa95ull, 0xaaa6aaaa96aaaa56ull, 0xaaaaaaaaaaaaaaaaull, 0xaaaaaaaaull},black);
+parent
+  abcdefghijkl 
+ 1............1
+ 2.........b..2
+ 3.......wbb..3
+ 4.......wbb..4
+ 5.......wb...5
+ 6.....wwb....6
+ 7.....wb.....7
+ 8.....w......8
+ 9............9
+10............10
+11............11
+12............12
+  abcdefghijkl 
+ turns11
+ReversiCode ({0x6aaaa2aaaaaaaaaaull, 0xaaa86aaaa06aaaa0ull, 0xaaa6aaaa86aaaa16ull, 0xaaaaaaaaaaaaaaaaull, 0xaaaaaaaaull},white);
+at line447 lastmove 90 l6
+  abcdefghijkl 
+ 1......b.w...1
+ 2.......w....2
+ 3......www...3
+ 4......ww.w..4
+ 5......www.w.5
+ 6.....www...w6
+ 7.....ww.....7
+ 8.....w......8
+ 9............9
+10............10
+11............11
+12............12
+  abcdefghijkl 
+ turns16
+ReversiCode ({0x5aaaaa6aaaa98aaaull, 0xaa995aaaa65aaaa9ull, 0xaaa6aaaa96aa6a56ull, 0xaaaaaaaaaaaaaaaaull, 0xaaaaaaaaull},black);
+parent
+  abcdefghijkl 
+ 1............1
+ 2.......w....2
+ 3.......wb...3
+ 4......bb.w..4
+ 5......bww...5
+ 6.....wbw....6
+ 7.....ww.....7
+ 8.....w......8
+ 9............9
+10............10
+11............11
+12............12
+  abcdefghijkl 
+ turns11
+ReversiCode ({0x6aaaaa6aaaaaaaaaull, 0xaaa94aaaa60aaaa8ull, 0xaaa6aaaa96aaaa46ull, 0xaaaaaaaaaaaaaaaaull, 0xaaaaaaaaull},white);
+at line447 lastmove 90 l6
+  abcdefghijkl 
+ 1......w.b.b.1
+ 2.......b.b..2
+ 3......b.b...3
+ 4.....bbb.b..4
+ 5......bb..b.5
+ 6.....bb....b6
+ 7.....bb.....7
+ 8......b.....8
+ 9............9
+10............10
+11............11
+12............12
+  abcdefghijkl 
+ turns16
+ReversiCode ({0x8aaaa22aaa889aaaull, 0xaa8a0aaaa202aaa8ull, 0xaa8aaaaa82aa2a82ull, 0xaaaaaaaaaaaaaaaaull, 0xaaaaaaaaull},white);
+parent
+  abcdefghijkl 
+ 1............1
+ 2.......b.w..2
+ 3......b.w...3
+ 4.....bbw.b..4
+ 5......bb....5
+ 6.....bb.....6
+ 7.....bb.....7
+ 8......b.....8
+ 9............9
+10............10
+11............11
+12............12
+  abcdefghijkl 
+ turns11
+ReversiCode ({0x8aaaa62aaaaaaaaaull, 0xaaaa0aaaa242aaa9ull, 0xaa8aaaaa82aaaa82ull, 0xaaaaaaaaaaaaaaaaull, 0xaaaaaaaaull},white);
+at line447 lastmove 90 l6
+  abcdefghijkl 
+ 1......w.b.b.1
+ 2.......b.b..2
+ 3......b.b...3
+ 4.....bbb.b..4
+ 5......b...b.5
+ 6.....bb....b6
+ 7.....bb.....7
+ 8.....bb.....8
+ 9............9
+10............10
+11............11
+12............12
+  abcdefghijkl 
+ turns16
+ReversiCode ({0x8aaaa22aaa889aaaull, 0xaa8a8aaaa202aaa8ull, 0xaa82aaaa82aa2a82ull, 0xaaaaaaaaaaaaaaaaull, 0xaaaaaaaaull},white);
+parent
+  abcdefghijkl 
+ 1............1
+ 2.......b.w..2
+ 3......b.w...3
+ 4.....bbw.b..4
+ 5......b.....5
+ 6.....bb.....6
+ 7.....bb.....7
+ 8.....bb.....8
+ 9............9
+10............10
+11............11
+12............12
+  abcdefghijkl 
+ turns11
+ReversiCode ({0x8aaaa62aaaaaaaaaull, 0xaaaa8aaaa242aaa9ull, 0xaa82aaaa82aaaa82ull, 0xaaaaaaaaaaaaaaaaull, 0xaaaaaaaaull},white);
+at line447 lastmove 90 l6
+  abcdefghijkl 
+ 1......w.b.b.1
+ 2.......b.b..2
+ 3......b.b...3
+ 4.....bbb.b..4
+ 5......b...b.5
+ 6.....bb....b6
+ 7.....bb.....7
+ 8....b.b.....8
+ 9............9
+10............10
+11............11
+12............12
+  abcdefghijkl 
+ turns16
+ReversiCode ({0x8aaaa22aaa889aaaull, 0xaa8a8aaaa202aaa8ull, 0xaa88aaaa82aa2a82ull, 0xaaaaaaaaaaaaaaaaull, 0xaaaaaaaaull},white);
+parent
+  abcdefghijkl 
+ 1............1
+ 2.......b.w..2
+ 3......b.w...3
+ 4.....bbw.b..4
+ 5......b.....5
+ 6.....bb.....6
+ 7.....bb.....7
+ 8....b.b.....8
+ 9............9
+10............10
+11............11
+12............12
+  abcdefghijkl 
+ turns11
+ReversiCode ({0x8aaaa62aaaaaaaaaull, 0xaaaa8aaaa242aaa9ull, 0xaa88aaaa82aaaa82ull, 0xaaaaaaaaaaaaaaaaull, 0xaaaaaaaaull},white);
+at line447 lastmove 90 l6
+  abcdefghijkl 
+ 1......w.b.b.1
+ 2.......b.b..2
+ 3......b.b...3
+ 4.....bbb.b..4
+ 5......b...b.5
+ 6.....bbb...b6
+ 7.....bb.....7
+ 8......b.....8
+ 9............9
+10............10
+11............11
+12............12
+  abcdefghijkl 
+ turns16
+ReversiCode ({0x8aaaa22aaa889aaaull, 0xaa8a8aaaa202aaa8ull, 0xaa8aaaaa82aa2a02ull, 0xaaaaaaaaaaaaaaaaull, 0xaaaaaaaaull},white);
+parent
+  abcdefghijkl 
+ 1............1
+ 2.......b.w..2
+ 3......b.w...3
+ 4.....bbw.b..4
+ 5......b.....5
+ 6.....bbb....6
+ 7.....bb.....7
+ 8......b.....8
+ 9............9
+10............10
+11............11
+12............12
+  abcdefghijkl 
+ turns11
+ReversiCode ({0x8aaaa62aaaaaaaaaull, 0xaaaa8aaaa242aaa9ull, 0xaa8aaaaa82aaaa02ull, 0xaaaaaaaaaaaaaaaaull, 0xaaaaaaaaull},white);
+at line447 lastmove 116 l8
+  abcdefghijkl 
+ 1....w.......1
+ 2.....w.b....2
+ 3......b.....3
+ 4.....bbbbb..4
+ 5......b.b...5
+ 6.....bbb.b..6
+ 7.....bb...b.7
+ 8......b....b8
+ 9............9
+10............10
+11............11
+12............12
+  abcdefghijkl 
+ turns16
+ReversiCode ({0x8aaaaa26aaaaa9aaull, 0xaaa88aaaa002aaaaull, 0x2a8aaa8a82aaa202ull, 0xaaaaaaaaaaaaaaaaull, 0xaaaaaaaaull},white);
+parent
+  abcdefghijkl 
+ 1............1
+ 2.....b......2
+ 3......b.....3
+ 4.....bbww...4
+ 5......b.b...5
+ 6.....bbw.b..6
+ 7.....bb.....7
+ 8......b.....8
+ 9............9
+10............10
+11............11
+12............12
+  abcdefghijkl 
+ turns11
+ReversiCode ({0x8aaaaaa2aaaaaaaaull, 0xaaa88aaaa942aaaaull, 0xaa8aaaaa82aaa242ull, 0xaaaaaaaaaaaaaaaaull, 0xaaaaaaaaull},white);
+at line447 lastmove 116 l8
+  abcdefghijkl 
+ 1....b.......1
+ 2.....b...b.b2
+ 3......b.b.b.3
+ 4.......b.b..4
+ 5......b.b...5
+ 6....bbbb.w..6
+ 7.....bb...w.7
+ 8...........w8
+ 9............9
+10............10
+11............11
+12............12
+  abcdefghijkl 
+ turns16
+ReversiCode ({0x8aaa22a2aaaaa8aaull, 0xaaa88aaaa22aaa88ull, 0x6aaaaa9a82aaa600ull, 0xaaaaaaaaaaaaaaaaull, 0xaaaaaaaaull},white);
+parent
+  abcdefghijkl 
+ 1............1
+ 2.....b......2
+ 3......b.b...3
+ 4.......b.w..4
+ 5......b.w...5
+ 6.....bbw.w..6
+ 7.....bb...w.7
+ 8......b.....8
+ 9............9
+10............10
+11............11
+12............12
+  abcdefghijkl 
+ turns11
+ReversiCode ({0x8aaaaaa2aaaaaaaaull, 0xaaa98aaaa62aaaa8ull, 0xaa8aaa9a82aaa642ull, 0xaaaaaaaaaaaaaaaaull, 0xaaaaaaaaull},white);
+at line447 lastmove 116 l8
+  abcdefghijkl 
+ 1....b.......1
+ 2.....b...b..2
+ 3......b.b...3
+ 4.......b.b..4
+ 5......b.b...5
+ 6....bbbb.w..6
+ 7.....bb...w.7
+ 8.....b.....w8
+ 9....b.......9
+10............10
+11............11
+12............12
+  abcdefghijkl 
+ turns16
+ReversiCode ({0x8aaaa2a2aaaaa8aaull, 0xaaa88aaaa22aaaa8ull, 0x6aa2aa9a82aaa600ull, 0xaaaaaaaaaaaaa8aaull, 0xaaaaaaaaull},white);
+parent
+  abcdefghijkl 
+ 1............1
+ 2.....b......2
+ 3......b.b...3
+ 4.......b.w..4
+ 5......b.w...5
+ 6.....bbw.w..6
+ 7.....bb...w.7
+ 8......b.....8
+ 9............9
+10............10
+11............11
+12............12
+  abcdefghijkl 
+ turns11
+ReversiCode ({0x8aaaaaa2aaaaaaaaull, 0xaaa98aaaa62aaaa8ull, 0xaa8aaa9a82aaa642ull, 0xaaaaaaaaaaaaaaaaull, 0xaaaaaaaaull},white);
+at line447 lastmove 19 f1
+  abcdefghijkl 
+ 1.....b......1
+ 2b.b.b.......2
+ 3.b.b........3
+ 4..b.b.......4
+ 5.w.b.b.b....5
+ 6w...bbb.....6
+ 7.....bb.....7
+ 8.....b......8
+ 9.....b......9
+10............10
+11............11
+12............12
+  abcdefghijkl 
+ turns16
+ReversiCode ({0xaa22aaa888aaa2aaull, 0xa9aa2226aaa88aaaull, 0xaaa2aaaa82aaaa80ull, 0xaaaaaaaaaaaaa2aaull, 0xaaaaaaaaull},white);
+parent
+  abcdefghijkl 
+ 1............1
+ 2............2
+ 3.w.b........3
+ 4..w.b.......4
+ 5.b.w.b.b....5
+ 6....wbb.....6
+ 7.....bb.....7
+ 8.....b......8
+ 9.....b......9
+10............10
+11............11
+12............12
+  abcdefghijkl 
+ turns11
+ReversiCode ({0xaa26aaaaaaaaaaaaull, 0xaaaa2262aaa89aaaull, 0xaaa2aaaa82aaaa81ull, 0xaaaaaaaaaaaaa2aaull, 0xaaaaaaaaull},white);
+at line447 lastmove 19 f1
+  abcdefghijkl 
+ 1.....b......1
+ 2b.b.b.......2
+ 3.b.b........3
+ 4..b.b.......4
+ 5.w.b.bb.....5
+ 6w...bbb.....6
+ 7.....bb.....7
+ 8.....b......8
+ 9.....b......9
+10............10
+11............11
+12............12
+  abcdefghijkl 
+ turns16
+ReversiCode ({0xaa22aaa888aaa2aaull, 0xa9aa8226aaa88aaaull, 0xaaa2aaaa82aaaa80ull, 0xaaaaaaaaaaaaa2aaull, 0xaaaaaaaaull},white);
+parent
+  abcdefghijkl 
+ 1............1
+ 2............2
+ 3.w.b........3
+ 4..w.b.......4
+ 5.b.w.bb.....5
+ 6....wbb.....6
+ 7.....bb.....7
+ 8.....b......8
+ 9.....b......9
+10............10
+11............11
+12............12
+  abcdefghijkl 
+ turns11
+ReversiCode ({0xaa26aaaaaaaaaaaaull, 0xaaaa8262aaa89aaaull, 0xaaa2aaaa82aaaa81ull, 0xaaaaaaaaaaaaa2aaull, 0xaaaaaaaaull},white);
+at line447 lastmove 19 f1
+  abcdefghijkl 
+ 1.....b......1
+ 2b.b.b.......2
+ 3.b.b........3
+ 4..b.b.......4
+ 5.w.b.b......5
+ 6w...bbbb....6
+ 7.....bb.....7
+ 8.....b......8
+ 9.....b......9
+10............10
+11............11
+12............12
+  abcdefghijkl 
+ turns16
+ReversiCode ({0xaa22aaa888aaa2aaull, 0xa9aaa226aaa88aaaull, 0xaaa2aaaa82aaaa00ull, 0xaaaaaaaaaaaaa2aaull, 0xaaaaaaaaull},white);
+parent
+  abcdefghijkl 
+ 1............1
+ 2............2
+ 3.w.b........3
+ 4..w.b.......4
+ 5.b.w.b......5
+ 6....wbbb....6
+ 7.....bb.....7
+ 8.....b......8
+ 9.....b......9
+10............10
+11............11
+12............12
+  abcdefghijkl 
+ turns11
+ReversiCode ({0xaa26aaaaaaaaaaaaull, 0xaaaaa262aaa89aaaull, 0xaaa2aaaa82aaaa01ull, 0xaaaaaaaaaaaaa2aaull, 0xaaaaaaaaull},white);
